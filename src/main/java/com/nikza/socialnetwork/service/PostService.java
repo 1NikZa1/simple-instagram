@@ -40,7 +40,7 @@ public class PostService {
         Post post = new Post();
         post.setUser(user);
         post.setCaption(postDTO.getCaption());
-        post.setCaption(postDTO.getLocation());
+        post.setLocation(postDTO.getLocation());
         post.setTitle(postDTO.getTitle());
         post.setLikes(0);
 
