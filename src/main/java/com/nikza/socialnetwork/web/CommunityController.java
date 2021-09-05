@@ -1,10 +1,7 @@
 package com.nikza.socialnetwork.web;
 
 import com.nikza.socialnetwork.dto.CommunityDTO;
-import com.nikza.socialnetwork.dto.PostDTO;
-import com.nikza.socialnetwork.dto.UserDTO;
 import com.nikza.socialnetwork.entity.Community;
-import com.nikza.socialnetwork.entity.Post;
 import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.facade.CommunityFacade;
 import com.nikza.socialnetwork.payload.response.MessageResponse;
@@ -13,7 +10,6 @@ import com.nikza.socialnetwork.validations.ResponseErrorValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +32,7 @@ public class CommunityController {
     private ResponseErrorValidation responseErrorValidation;
 
     @GetMapping("/all")
-    public ResponseEntity<List<CommunityDTO>> getAllPosts() {
+    public ResponseEntity<List<CommunityDTO>> getAllCommunities() {
         List<CommunityDTO> communityDTOList = communityService.getAllCommunities()
                 .stream()
                 .map(communityFacade::communityToCommunityDTO)
