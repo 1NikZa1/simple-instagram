@@ -81,6 +81,10 @@ public class PostService {
         return postRepository.findAllByUserOrderByCreatedDate(user);
     }
 
+    public List<Post> getAllPostsForCommunity(Long communityId) {
+        return postRepository.findAllByCommunityOrderByCreatedDate(communityRepository.getById(communityId));
+    }
+
     public Post likePost(Long postId, String username) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post cannot be found "));
@@ -107,7 +111,7 @@ public class PostService {
         imageModel.ifPresent(imageRepository::delete);
     }
 
-    private User getUserByPrincipal(Principal principal) {
+    public User getUserByPrincipal(Principal principal) {
         String username = principal.getName();
         return userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("username not found"));

@@ -2,9 +2,12 @@ package com.nikza.socialnetwork.web;
 
 import com.nikza.socialnetwork.dto.CommunityPostDTO;
 import com.nikza.socialnetwork.dto.PostDTO;
+import com.nikza.socialnetwork.entity.Community;
 import com.nikza.socialnetwork.entity.Post;
+import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.facade.PostFacade;
 import com.nikza.socialnetwork.payload.response.MessageResponse;
+import com.nikza.socialnetwork.service.CommunityService;
 import com.nikza.socialnetwork.service.PostService;
 import com.nikza.socialnetwork.validations.ResponseErrorValidation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,8 @@ public class PostController {
     @Autowired
     private PostFacade postFacade;
     @Autowired
+    private CommunityService communityService;
+    @Autowired
     private ResponseErrorValidation responseErrorValidation;
 
     @PostMapping("/create")
@@ -52,8 +57,15 @@ public class PostController {
         ResponseEntity<Object> errors = responseErrorValidation.mapValidationService(bindingResult);
 
         if (!ObjectUtils.isEmpty(errors)) return errors;
-        Post post = postService.createPostToGroup(postDTO, principal, Long.parseLong(communityId));
-        CommunityPostDTO createdPost = postFacade.postToCommunityPostDTO(post);
+
+        User user = postService.getUserByPrincipal(principal);
+        Community community = communityService.getCommunityById(Long.parseLong(communityId));
+        CommunityPostDTO createdPost = null;
+
+        if (user.getId().equals(community.getCreator().getId())){
+            Post post = postService.createPostToGroup(postDTO, principal, Long.parseLong(communityId));
+            createdPost = postFacade.postToCommunityPostDTO(post);
+        }
 
         return new ResponseEntity<>(createdPost, HttpStatus.OK);
     }
@@ -72,6 +84,16 @@ public class PostController {
         List<PostDTO> postDTOList = postService.getAllPostsForUser(principal)
                 .stream()
                 .map(postFacade::postToPostDTO)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(postDTOList, HttpStatus.OK);
+
+    }
+
+    @GetMapping("/community/{communityId}/posts")
+    public ResponseEntity<List<CommunityPostDTO>> getAllPostsForCommunity(@PathVariable("communityId") String communityId) {
+        List<CommunityPostDTO> postDTOList = postService.getAllPostsForCommunity(Long.parseLong(communityId))
+                .stream()
+                .map(postFacade::postToCommunityPostDTO)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(postDTOList, HttpStatus.OK);
 
