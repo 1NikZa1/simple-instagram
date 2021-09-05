@@ -23,7 +23,6 @@ public class CommentService {
 
     public static final Logger LOG = LoggerFactory.getLogger(CommentService.class);
 
-
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;

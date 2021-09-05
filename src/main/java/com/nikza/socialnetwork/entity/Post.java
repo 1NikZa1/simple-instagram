@@ -28,6 +28,9 @@ public class Post {
     @ManyToOne(fetch = FetchType.EAGER)
     private User user;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Community community;
+
     @OneToMany(cascade = CascadeType.REFRESH,fetch = FetchType.EAGER,mappedBy = "post",orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 

@@ -1,7 +1,6 @@
 package com.nikza.socialnetwork.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.nikza.socialnetwork.entity.enums.Role;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -38,6 +37,13 @@ public class User implements UserDetails {
 
     @Column(columnDefinition = "text")
     private String bio;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_groups",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id")
+    )
+    private List<Community> communities = new ArrayList<>();
 
     @ElementCollection(targetClass = Role.class)
     @CollectionTable(name = "user_role",

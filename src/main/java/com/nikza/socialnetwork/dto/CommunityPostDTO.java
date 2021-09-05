@@ -5,13 +5,13 @@ import lombok.Data;
 import java.util.Set;
 
 @Data
-public class PostDTO {
+public class CommunityPostDTO {
 
     private Long id;
     private String title;
     private String caption;
     private String location;
-    private String username;
+    private String communityName;
     private Integer likes;
     private Set<String> usersLiked;
 

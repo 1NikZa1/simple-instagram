@@ -2,7 +2,7 @@ package com.nikza.socialnetwork.service;
 
 import com.nikza.socialnetwork.dto.UserDTO;
 import com.nikza.socialnetwork.entity.User;
-import com.nikza.socialnetwork.entity.enums.Role;
+import com.nikza.socialnetwork.entity.Role;
 import com.nikza.socialnetwork.exceptions.UserExistException;
 import com.nikza.socialnetwork.payload.request.SignupRequest;
 import com.nikza.socialnetwork.repository.UserRepository;

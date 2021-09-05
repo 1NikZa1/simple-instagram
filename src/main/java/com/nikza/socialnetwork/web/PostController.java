@@ -1,5 +1,6 @@
 package com.nikza.socialnetwork.web;
 
+import com.nikza.socialnetwork.dto.CommunityPostDTO;
 import com.nikza.socialnetwork.dto.PostDTO;
 import com.nikza.socialnetwork.entity.Post;
 import com.nikza.socialnetwork.facade.PostFacade;
@@ -37,8 +38,22 @@ public class PostController {
         ResponseEntity<Object> errors = responseErrorValidation.mapValidationService(bindingResult);
 
         if (!ObjectUtils.isEmpty(errors)) return errors;
-        Post post = postService.createPost(postDTO, principal);
+        Post post = postService.createPostToUser(postDTO, principal);
         PostDTO createdPost = postFacade.postToPostDTO(post);
+
+        return new ResponseEntity<>(createdPost, HttpStatus.OK);
+    }
+
+    @PostMapping("/{communityId}/create")
+    public ResponseEntity<Object> createPostForCommunity(@Valid @RequestBody CommunityPostDTO postDTO,
+                                                         BindingResult bindingResult,
+                                                         Principal principal,
+                                                         @PathVariable("communityId") String communityId) {
+        ResponseEntity<Object> errors = responseErrorValidation.mapValidationService(bindingResult);
+
+        if (!ObjectUtils.isEmpty(errors)) return errors;
+        Post post = postService.createPostToGroup(postDTO, principal, Long.parseLong(communityId));
+        CommunityPostDTO createdPost = postFacade.postToCommunityPostDTO(post);
 
         return new ResponseEntity<>(createdPost, HttpStatus.OK);
     }

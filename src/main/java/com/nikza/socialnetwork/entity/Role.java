@@ -1,4 +1,4 @@
-package com.nikza.socialnetwork.entity.enums;
+package com.nikza.socialnetwork.entity;
 
 public enum Role {
     ROLE_USER,

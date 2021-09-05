@@ -58,7 +58,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<Object> registerUser(@Valid @RequestBody SignupRequest signupRequest,
-                                               BindingResult bindingResult) throws UserExistException {
+                                                BindingResult bindingResult) throws UserExistException {
 
         ResponseEntity<Object> errors = responseErrorValidation.mapValidationService(bindingResult);
 

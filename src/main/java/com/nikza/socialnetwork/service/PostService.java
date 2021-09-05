@@ -1,10 +1,13 @@
 package com.nikza.socialnetwork.service;
 
+import com.nikza.socialnetwork.dto.CommunityDTO;
+import com.nikza.socialnetwork.dto.CommunityPostDTO;
 import com.nikza.socialnetwork.dto.PostDTO;
 import com.nikza.socialnetwork.entity.ImageModel;
 import com.nikza.socialnetwork.entity.Post;
 import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.exceptions.PostNotFoundException;
+import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.ImageRepository;
 import com.nikza.socialnetwork.repository.PostRepository;
 import com.nikza.socialnetwork.repository.UserRepository;
@@ -26,16 +29,18 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
+    private final CommunityRepository communityRepository;
 
 
     @Autowired
-    public PostService(PostRepository postRepository, UserRepository userRepository, ImageRepository imageRepository) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, ImageRepository imageRepository, CommunityRepository communityRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.imageRepository = imageRepository;
+        this.communityRepository = communityRepository;
     }
 
-    public Post createPost(PostDTO postDTO, Principal principal) {
+    public Post createPostToUser(PostDTO postDTO, Principal principal) {
         User user = getUserByPrincipal(principal);
         Post post = new Post();
         post.setUser(user);
@@ -45,6 +50,19 @@ public class PostService {
         post.setLikes(0);
 
         LOG.info("saving Post for User: {}", user.getEmail());
+        return postRepository.save(post);
+    }
+
+    public Post createPostToGroup(CommunityPostDTO postDTO, Principal principal, Long communityId) {
+        User user = getUserByPrincipal(principal);
+        Post post = new Post();
+        post.setCommunity(communityRepository.findById(communityId).orElse(null));
+        post.setCaption(postDTO.getCaption());
+        post.setLocation(postDTO.getLocation());
+        post.setTitle(postDTO.getTitle());
+        post.setLikes(0);
+
+        LOG.info("saving Post for Group with id: {}", communityId);
         return postRepository.save(post);
     }
 

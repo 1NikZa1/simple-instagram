@@ -1,16 +1,17 @@
 package com.nikza.socialnetwork.service;
 
+import com.nikza.socialnetwork.entity.Community;
 import com.nikza.socialnetwork.entity.ImageModel;
 import com.nikza.socialnetwork.entity.Post;
 import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.exceptions.ImageNotFoundException;
+import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.ImageRepository;
 import com.nikza.socialnetwork.repository.PostRepository;
 import com.nikza.socialnetwork.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -33,12 +34,14 @@ public class ImageUploadService {
     private ImageRepository imageRepository;
     private UserRepository userRepository;
     private PostRepository postRepository;
+    private CommunityRepository communityRepository;
 
     @Autowired
-    public ImageUploadService(ImageRepository imageRepository, UserRepository userRepository, PostRepository postRepository) {
+    public ImageUploadService(ImageRepository imageRepository, UserRepository userRepository, PostRepository postRepository, CommunityRepository communityRepository) {
         this.imageRepository = imageRepository;
         this.userRepository = userRepository;
         this.postRepository = postRepository;
+        this.communityRepository = communityRepository;
     }
 
     public ImageModel uploadImageToUser(MultipartFile file, Principal principal) throws IOException {
@@ -55,7 +58,19 @@ public class ImageUploadService {
         imageModel.setImageBytes(compressBytes(file.getBytes()));
         imageModel.setName(file.getOriginalFilename());
         return imageRepository.save(imageModel);
+    }
 
+    public void uploadImageToCommunity(MultipartFile file, Principal principal, Long communityId) throws IOException {
+        User user = getUserByPrincipal(principal);
+        Community community = communityRepository.getById(communityId);
+        if (user.getId().equals(community.getCreator().getId())) {
+            ImageModel imageModel = new ImageModel();
+            imageModel.setCommunityId(community.getId());
+            imageModel.setImageBytes(compressBytes(file.getBytes()));
+            imageModel.setName(file.getOriginalFilename());
+            LOG.info("uploading image to Community {}", community.getId());
+            imageRepository.save(imageModel);
+        }
     }
 
     public ImageModel uploadImageToPost(MultipartFile file, Principal principal, Long postId) throws IOException {
@@ -84,6 +99,15 @@ public class ImageUploadService {
     public ImageModel getImageToPost(Long postId) {
         ImageModel imageModel = imageRepository.findByPostId(postId)
                 .orElseThrow(() -> new ImageNotFoundException("cannot find image to Post: " + postId));
+        if (!ObjectUtils.isEmpty(imageModel)) {
+            imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
+        }
+        return imageModel;
+    }
+
+    public ImageModel getImageToCommunity(Long communityId) {
+        ImageModel imageModel = imageRepository.findByCommunityId(communityId)
+                .orElseThrow(() -> new ImageNotFoundException("cannot find image to Community: " + communityId));
         if (!ObjectUtils.isEmpty(imageModel)) {
             imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
         }

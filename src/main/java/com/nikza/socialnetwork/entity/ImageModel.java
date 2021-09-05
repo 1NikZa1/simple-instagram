@@ -24,5 +24,9 @@ public class ImageModel {
     private Long userId;
 
     @JsonIgnore
+    private Long communityId;
+
+    @JsonIgnore
     private Long postId;
+
 }
