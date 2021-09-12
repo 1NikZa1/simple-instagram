@@ -20,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.zip.DataFormatException;
@@ -63,6 +65,11 @@ public class ImageUploadService {
     public void uploadImageToCommunity(MultipartFile file, Principal principal, Long communityId) throws IOException {
         User user = getUserByPrincipal(principal);
         Community community = communityRepository.getById(communityId);
+        ImageModel userProfileImage = imageRepository.findByCommunityId(community.getId())
+                .orElse(null);
+        if (!ObjectUtils.isEmpty(userProfileImage)) {
+            imageRepository.delete(userProfileImage);
+        }
         if (user.getId().equals(community.getCreator().getId())) {
             ImageModel imageModel = new ImageModel();
             imageModel.setCommunityId(community.getId());
@@ -75,10 +82,19 @@ public class ImageUploadService {
 
     public ImageModel uploadImageToPost(MultipartFile file, Principal principal, Long postId) throws IOException {
         User user = getUserByPrincipal(principal);
-        Post post = user.getPosts()
-                .stream()
+        List<Post> posts = new ArrayList<>(user.getPosts());
+        List<Community> communities = communityRepository.findAllByOrderByName();
+
+        List<Post> communityPostList = communities.stream()
+                .flatMap(e -> e.getPosts().stream())
+                .collect(Collectors.toList());
+
+        posts.addAll(communityPostList);
+
+        Post post = posts.stream()
                 .filter(p -> p.getId().equals(postId))
                 .collect(toSinglePostCollector());
+
         ImageModel imageModel = new ImageModel();
         imageModel.setPostId(post.getId());
         imageModel.setImageBytes(compressBytes(file.getBytes()));

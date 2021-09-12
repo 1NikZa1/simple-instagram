@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -65,10 +66,13 @@ public class CommunityService {
     }
 
     public void delete(Long communityId, Principal principal) {
+        User user = getUserByPrincipal(principal);
         Community community = getCommunityById(communityId);
-        Optional<ImageModel> imageModel = imageRepository.findByCommunityId(communityId);
-        communityRepository.delete(community);
-        imageModel.ifPresent(imageRepository::delete);
+        if (Objects.equals(user.getId(), community.getCreator().getId())) {
+            Optional<ImageModel> imageModel = imageRepository.findByCommunityId(communityId);
+            communityRepository.delete(community);
+            imageModel.ifPresent(imageRepository::delete);
+        }
     }
 
     public User getUserByPrincipal(Principal principal) {
