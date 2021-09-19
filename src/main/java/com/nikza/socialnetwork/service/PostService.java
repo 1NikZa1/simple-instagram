@@ -86,9 +86,9 @@ public class PostService {
         List<Community> communities = communityRepository.findAllByUsers_id(user.getId());
         return communities.stream().flatMap(community -> postRepository.findAllByCommunityOrderByCreatedDate(community).stream()).sorted((a, b) -> {
             if (a.getCreatedDate().isBefore(b.getCreatedDate())) {
-                return -1;
-            } else if (a.getCreatedDate().isAfter(b.getCreatedDate())) {
                 return 1;
+            } else if (a.getCreatedDate().isAfter(b.getCreatedDate())) {
+                return -1;
             } else {
                 return 0;
             }
