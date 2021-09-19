@@ -6,7 +6,6 @@ import com.nikza.socialnetwork.entity.ImageModel;
 import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.ImageRepository;
-import com.nikza.socialnetwork.repository.PostRepository;
 import com.nikza.socialnetwork.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +24,12 @@ public class CommunityService {
     public static final Logger LOG = LoggerFactory.getLogger(CommunityService.class);
 
     private final CommunityRepository communityRepository;
-    private final PostRepository postRepository;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
 
     @Autowired
-    public CommunityService(CommunityRepository communityRepository, PostRepository postRepository, ImageRepository imageRepository, UserRepository userRepository) {
+    public CommunityService(CommunityRepository communityRepository, ImageRepository imageRepository, UserRepository userRepository) {
         this.communityRepository = communityRepository;
-        this.postRepository = postRepository;
         this.imageRepository = imageRepository;
         this.userRepository = userRepository;
     }
@@ -73,6 +70,19 @@ public class CommunityService {
             communityRepository.delete(community);
             imageModel.ifPresent(imageRepository::delete);
         }
+    }
+
+    public void followCommunity(Long communityId, Principal principal){
+        User user = getUserByPrincipal(principal);
+        Community community = getCommunityById(communityId);
+        community.addUserToCommunity(user);
+        user.addCommunityToUser(community);
+        System.out.println(community.getUsers().size());
+        userRepository.save(user);
+    }
+
+    public List<User> getFollowedUsers(Long communityId){
+        return userRepository.findAllByCommunities_id(communityId);
     }
 
     public User getUserByPrincipal(Principal principal) {

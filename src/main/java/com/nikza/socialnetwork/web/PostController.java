@@ -63,7 +63,7 @@ public class PostController {
         CommunityPostDTO createdPost = null;
 
         if (user.getId().equals(community.getCreator().getId())){
-            Post post = postService.createPostToGroup(postDTO, principal, Long.parseLong(communityId));
+            Post post = postService.createPostToGroup(postDTO, Long.parseLong(communityId));
             createdPost = postFacade.postToCommunityPostDTO(post);
         }
 
@@ -73,6 +73,15 @@ public class PostController {
     @GetMapping("/all")
     public ResponseEntity<List<PostDTO>> getAllPosts() {
         List<PostDTO> postDTOList = postService.getAllPosts()
+                .stream()
+                .map(postFacade::postToPostDTO)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(postDTOList, HttpStatus.OK);
+    }
+
+    @GetMapping("/feed")
+    public ResponseEntity<List<PostDTO>> getAllPostsFromFollowedCommunities(Principal principal) {
+        List<PostDTO> postDTOList = postService.getAllPostsFromFollowedCommunities(principal)
                 .stream()
                 .map(postFacade::postToPostDTO)
                 .collect(Collectors.toList());

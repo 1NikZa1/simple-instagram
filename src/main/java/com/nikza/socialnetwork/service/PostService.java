@@ -1,8 +1,8 @@
 package com.nikza.socialnetwork.service;
 
-import com.nikza.socialnetwork.dto.CommunityDTO;
 import com.nikza.socialnetwork.dto.CommunityPostDTO;
 import com.nikza.socialnetwork.dto.PostDTO;
+import com.nikza.socialnetwork.entity.Community;
 import com.nikza.socialnetwork.entity.ImageModel;
 import com.nikza.socialnetwork.entity.Post;
 import com.nikza.socialnetwork.entity.User;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -53,8 +54,7 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    public Post createPostToGroup(CommunityPostDTO postDTO, Principal principal, Long communityId) {
-        User user = getUserByPrincipal(principal);
+    public Post createPostToGroup(CommunityPostDTO postDTO, Long communityId) {
         Post post = new Post();
         post.setCommunity(communityRepository.findById(communityId).orElse(null));
         post.setCaption(postDTO.getCaption());
@@ -79,6 +79,20 @@ public class PostService {
     public List<Post> getAllPostsForUser(Principal principal) {
         User user = getUserByPrincipal(principal);
         return postRepository.findAllByUserOrderByCreatedDate(user);
+    }
+
+    public List<Post> getAllPostsFromFollowedCommunities(Principal principal) {
+        User user = getUserByPrincipal(principal);
+        List<Community> communities = communityRepository.findAllByUsers_id(user.getId());
+        return communities.stream().flatMap(community -> postRepository.findAllByCommunityOrderByCreatedDate(community).stream()).sorted((a, b) -> {
+            if (a.getCreatedDate().isBefore(b.getCreatedDate())) {
+                return -1;
+            } else if (a.getCreatedDate().isAfter(b.getCreatedDate())) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }).collect(Collectors.toList());
     }
 
     public List<Post> getAllPostsForCommunity(Long communityId) {

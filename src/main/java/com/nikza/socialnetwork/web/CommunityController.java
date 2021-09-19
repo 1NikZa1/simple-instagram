@@ -1,9 +1,11 @@
 package com.nikza.socialnetwork.web;
 
 import com.nikza.socialnetwork.dto.CommunityDTO;
+import com.nikza.socialnetwork.dto.UserDTO;
 import com.nikza.socialnetwork.entity.Community;
 import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.facade.CommunityFacade;
+import com.nikza.socialnetwork.facade.UserFacade;
 import com.nikza.socialnetwork.payload.response.MessageResponse;
 import com.nikza.socialnetwork.service.CommunityService;
 import com.nikza.socialnetwork.validations.ResponseErrorValidation;
@@ -29,6 +31,8 @@ public class CommunityController {
     @Autowired
     private CommunityFacade communityFacade;
     @Autowired
+    private UserFacade userFacade;
+    @Autowired
     private ResponseErrorValidation responseErrorValidation;
 
     @GetMapping("/all")
@@ -38,6 +42,22 @@ public class CommunityController {
                 .map(communityFacade::communityToCommunityDTO)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(communityDTOList, HttpStatus.OK);
+    }
+
+    @GetMapping("/{communityId}/followed")
+    public ResponseEntity<List<UserDTO>> getFollowedUsers(@PathVariable("communityId") String communnityId) {
+        List<UserDTO> followedUsers = communityService.getFollowedUsers(Long.parseLong(communnityId))
+                .stream()
+                .map(userFacade::userToUserDTO)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(followedUsers, HttpStatus.OK);
+    }
+
+    @PostMapping("/{communityId}/follow")
+    public ResponseEntity<MessageResponse> followCommunity(@PathVariable("communityId") String communityId,
+                                                              Principal principal) {
+        communityService.followCommunity(Long.parseLong(communityId), principal);
+        return new ResponseEntity<>(new MessageResponse("subscribed successfully"), HttpStatus.OK);
     }
 
     @PostMapping("/create")

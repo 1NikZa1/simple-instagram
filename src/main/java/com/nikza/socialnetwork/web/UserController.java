@@ -1,7 +1,9 @@
 package com.nikza.socialnetwork.web;
 
+import com.nikza.socialnetwork.dto.CommunityDTO;
 import com.nikza.socialnetwork.dto.UserDTO;
 import com.nikza.socialnetwork.entity.User;
+import com.nikza.socialnetwork.facade.CommunityFacade;
 import com.nikza.socialnetwork.facade.UserFacade;
 import com.nikza.socialnetwork.service.UserService;
 import com.nikza.socialnetwork.validations.ResponseErrorValidation;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/user")
@@ -24,6 +28,8 @@ public class UserController {
     private UserService userService;
     @Autowired
     private UserFacade userFacade;
+    @Autowired
+    private CommunityFacade communityFacade;
     @Autowired
     private ResponseErrorValidation responseErrorValidation;
 
@@ -41,6 +47,16 @@ public class UserController {
         UserDTO userDTO = userFacade.userToUserDTO(user);
 
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    }
+
+    @GetMapping("/communities")
+    public ResponseEntity<List<CommunityDTO>> getFollowedCommunities(Principal principal) {
+        List<CommunityDTO> communityDTOList = userService.getCommunitiesFollowedByUser(principal)
+                .stream()
+                .map(communityFacade::communityToCommunityDTO)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(communityDTOList, HttpStatus.OK);
     }
 
     @PostMapping("/update")

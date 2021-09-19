@@ -43,7 +43,7 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "group_id")
     )
-    private List<Community> communities = new ArrayList<>();
+    private Set<Community> communities = new HashSet<>();
 
     @ElementCollection(targetClass = Role.class)
     @CollectionTable(name = "user_role",
@@ -70,6 +70,15 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.authorities = authorities;
+    }
+
+    public void addCommunityToUser(Community community) {
+        if (communities.contains(community)) {
+            communities.remove(community);
+        } else {
+            communities.add(community);
+            community.addUserToCommunity(this);
+        }
     }
 
     @PrePersist
@@ -104,5 +113,18 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -1,10 +1,12 @@
 package com.nikza.socialnetwork.service;
 
 import com.nikza.socialnetwork.dto.UserDTO;
-import com.nikza.socialnetwork.entity.User;
+import com.nikza.socialnetwork.entity.Community;
 import com.nikza.socialnetwork.entity.Role;
+import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.exceptions.UserExistException;
 import com.nikza.socialnetwork.payload.request.SignupRequest;
+import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,21 +16,24 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.List;
 
 @Service
 public class UserService {
     public static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final CommunityRepository communityRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, CommunityRepository communityRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.communityRepository = communityRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User createUser(SignupRequest userIn) throws UserExistException {
+    public void createUser(SignupRequest userIn) throws UserExistException {
         User user = new User();
 
         user.setName(userIn.getFirstname());
@@ -39,7 +44,7 @@ public class UserService {
         user.getRole().add(Role.ROLE_USER);
         try {
             LOG.info("saving user {}", userIn.getEmail());
-            return userRepository.save(user);
+            userRepository.save(user);
         } catch (Exception ex) {
             LOG.error("error of reg.{}", ex.getMessage());
             throw new UserExistException("The user " + user.getUsername() + " already exist");
@@ -55,13 +60,18 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User getCurrentUser(Principal principal){
+    public User getCurrentUser(Principal principal) {
         return getUserByPrincipal(principal);
     }
 
     public User getUserById(Long userId) {
         return userRepository.findUserById(userId)
-                .orElseThrow(()->new UsernameNotFoundException("user not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+    }
+
+    public List<Community> getCommunitiesFollowedByUser(Principal principal) {
+        User user = getUserByPrincipal(principal);
+        return communityRepository.findAllByUsers_id(user.getId());
     }
 
     private User getUserByPrincipal(Principal principal) {
