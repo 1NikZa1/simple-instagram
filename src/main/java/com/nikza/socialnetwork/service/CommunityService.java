@@ -79,6 +79,8 @@ public class CommunityService {
         user.addCommunityToUser(community);
         System.out.println(community.getUsers().size());
         userRepository.save(user);
+        LOG.info("followed Community: {}", community.getId());
+
     }
 
     public List<User> getFollowedUsers(Long communityId){

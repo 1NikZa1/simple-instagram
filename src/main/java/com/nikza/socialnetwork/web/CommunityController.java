@@ -53,7 +53,7 @@ public class CommunityController {
         return new ResponseEntity<>(followedUsers, HttpStatus.OK);
     }
 
-    @PostMapping("/{communityId}/follow")
+    @GetMapping("/{communityId}/follow")
     public ResponseEntity<MessageResponse> followCommunity(@PathVariable("communityId") String communityId,
                                                               Principal principal) {
         communityService.followCommunity(Long.parseLong(communityId), principal);
