@@ -45,7 +45,6 @@ public class UserController {
     public ResponseEntity<UserDTO> getUserProfile(@PathVariable("userId") String userId) {
         User user = userService.getUserById(Long.parseLong(userId));
         UserDTO userDTO = userFacade.userToUserDTO(user);
-
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 

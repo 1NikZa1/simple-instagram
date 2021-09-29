@@ -74,6 +74,11 @@ public class UserService {
         return communityRepository.findAllByUsers_id(user.getId());
     }
 
+    public List<Community> getCommunitiesCreatedByUser(Principal principal) {
+        User user = getUserByPrincipal(principal);
+        return communityRepository.findAllByCreator_id(user.getId());
+    }
+
     private User getUserByPrincipal(Principal principal) {
         String username = principal.getName();
         return userRepository.findUserByUsername(username)

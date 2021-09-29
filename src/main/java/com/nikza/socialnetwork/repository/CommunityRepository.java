@@ -15,4 +15,6 @@ public interface CommunityRepository extends JpaRepository<Community, Long> {
     List<Community> findAllByOrderByName();
 
     List<Community> findAllByUsers_id(Long id);
+
+    List<Community> findAllByCreator_id(Long id);
 }
