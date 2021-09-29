@@ -80,7 +80,11 @@ public class CommunityService {
         System.out.println(community.getUsers().size());
         userRepository.save(user);
         LOG.info("followed Community: {}", community.getId());
+    }
 
+    public User getAdmin(Long communityId){
+        Community community = getCommunityById(communityId);
+        return community.getCreator();
     }
 
     public List<User> getFollowedUsers(Long communityId){

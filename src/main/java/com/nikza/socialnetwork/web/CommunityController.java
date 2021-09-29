@@ -60,6 +60,13 @@ public class CommunityController {
         return new ResponseEntity<>(new MessageResponse("subscribed successfully"), HttpStatus.OK);
     }
 
+    @GetMapping("/{communityId}/admin")
+    public ResponseEntity<UserDTO> getAdmin(@PathVariable("communityId") String communityId,
+                                                           Principal principal) {
+        User user = communityService.getAdmin(Long.parseLong(communityId));
+        return new ResponseEntity<>(userFacade.userToUserDTO(user), HttpStatus.OK);
+    }
+
     @PostMapping("/create")
     public ResponseEntity<Object> createCommunity(@Valid @RequestBody CommunityDTO communityDTO,
                                                   BindingResult bindingResult,

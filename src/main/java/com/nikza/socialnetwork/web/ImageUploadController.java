@@ -53,6 +53,13 @@ public class ImageUploadController {
         return new ResponseEntity<>(userImage, HttpStatus.OK);
     }
 
+    @GetMapping("/profileImage/{userId}")
+    public ResponseEntity<ImageModel> getImageToUserById(@PathVariable("userId") String userId){
+        ImageModel userImage = imageUploadService.getImageToUserById(Long.parseLong(userId));
+
+        return new ResponseEntity<>(userImage, HttpStatus.OK);
+    }
+
     @GetMapping("/community/{communityId}/image")
     public ResponseEntity<ImageModel> getImageToCommunity(@PathVariable("communityId") String communityId){
         ImageModel communityImage = imageUploadService.getImageToCommunity(Long.parseLong(communityId));
