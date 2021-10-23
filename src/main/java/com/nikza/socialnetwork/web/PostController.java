@@ -98,6 +98,16 @@ public class PostController {
 
     }
 
+    @GetMapping("/user/{userId}/posts")
+    public ResponseEntity<List<PostDTO>> getAllPostsForUserById(@PathVariable("userId") String userId) {
+        List<PostDTO> postDTOList = postService.getAllPostsForUserById(Long.parseLong(userId))
+                .stream()
+                .map(postFacade::postToPostDTO)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(postDTOList, HttpStatus.OK);
+
+    }
+
     @GetMapping("/community/{communityId}/posts")
     public ResponseEntity<List<CommunityPostDTO>> getAllPostsForCommunity(@PathVariable("communityId") String communityId) {
         List<CommunityPostDTO> postDTOList = postService.getAllPostsForCommunity(Long.parseLong(communityId))
