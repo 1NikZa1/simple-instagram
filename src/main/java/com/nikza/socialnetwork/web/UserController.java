@@ -58,6 +58,16 @@ public class UserController {
         return new ResponseEntity<>(communityDTOList, HttpStatus.OK);
     }
 
+    @GetMapping("/communities/createdCommunities")
+    public ResponseEntity<List<CommunityDTO>> getCreatedCommunities(Principal principal) {
+        List<CommunityDTO> communityDTOList = userService.getCommunitiesCreatedByUser(principal)
+                .stream()
+                .map(communityFacade::communityToCommunityDTO)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(communityDTOList, HttpStatus.OK);
+    }
+
     @PostMapping("/update")
     public ResponseEntity<Object> updateUser(@Valid @RequestBody UserDTO userDTO,
                                              BindingResult bindingResult,
