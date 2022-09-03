@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Entity
+@Entity(name = "users")
 @Data
 @NoArgsConstructor
 public class User implements UserDetails {
