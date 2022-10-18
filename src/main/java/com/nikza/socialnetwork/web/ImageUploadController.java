@@ -25,7 +25,7 @@ public class ImageUploadController {
                                                              Principal principal) throws IOException {
         imageUploadService.uploadImageToUser(file, principal);
 
-        return new ResponseEntity<>(new MessageResponse("Image upload successfully"), HttpStatus.OK);
+        return new ResponseEntity<>(new MessageResponse("Image upload successfully to user"), HttpStatus.OK);
     }
 
     @PostMapping("/{postId}/upload")
@@ -34,7 +34,7 @@ public class ImageUploadController {
                                                              Principal principal) throws IOException{
         imageUploadService.uploadImageToPost(file, principal, Long.parseLong(postId));
 
-        return new ResponseEntity<>(new MessageResponse("Image upload successfully"), HttpStatus.OK);
+        return new ResponseEntity<>(new MessageResponse("Image upload successfully to post"), HttpStatus.OK);
     }
 
     @PostMapping("community/{communityId}/upload")

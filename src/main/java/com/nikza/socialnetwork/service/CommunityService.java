@@ -77,7 +77,6 @@ public class CommunityService {
         Community community = getCommunityById(communityId);
         community.addUserToCommunity(user);
         user.addCommunityToUser(community);
-        System.out.println(community.getUsers().size());
         userRepository.save(user);
         LOG.info("followed Community: {}", community.getId());
     }
@@ -96,6 +95,4 @@ public class CommunityService {
         return userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("username not found"));
     }
-
-
 }

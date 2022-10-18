@@ -7,7 +7,6 @@ import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.exceptions.ImageNotFoundException;
 import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.ImageRepository;
-import com.nikza.socialnetwork.repository.PostRepository;
 import com.nikza.socialnetwork.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,20 +32,18 @@ public class ImageUploadService {
 
     public static final Logger LOG = LoggerFactory.getLogger(ImageUploadService.class);
 
-    private ImageRepository imageRepository;
-    private UserRepository userRepository;
-    private PostRepository postRepository;
-    private CommunityRepository communityRepository;
+    private final ImageRepository imageRepository;
+    private final UserRepository userRepository;
+    private final CommunityRepository communityRepository;
 
     @Autowired
-    public ImageUploadService(ImageRepository imageRepository, UserRepository userRepository, PostRepository postRepository, CommunityRepository communityRepository) {
+    public ImageUploadService(ImageRepository imageRepository, UserRepository userRepository, CommunityRepository communityRepository) {
         this.imageRepository = imageRepository;
         this.userRepository = userRepository;
-        this.postRepository = postRepository;
         this.communityRepository = communityRepository;
     }
 
-    public ImageModel uploadImageToUser(MultipartFile file, Principal principal) throws IOException {
+    public void uploadImageToUser(MultipartFile file, Principal principal) throws IOException {
         User user = getUserByPrincipal(principal);
         LOG.info("uploading image profile to User {}", user.getUsername());
 
@@ -59,12 +56,12 @@ public class ImageUploadService {
         imageModel.setUserId(user.getId());
         imageModel.setImageBytes(compressBytes(file.getBytes()));
         imageModel.setName(file.getOriginalFilename());
-        return imageRepository.save(imageModel);
+        imageRepository.save(imageModel);
     }
 
     public void uploadImageToCommunity(MultipartFile file, Principal principal, Long communityId) throws IOException {
         User user = getUserByPrincipal(principal);
-        Community community = communityRepository.getById(communityId);
+        Community community = communityRepository.getReferenceById(communityId);
         ImageModel userProfileImage = imageRepository.findByCommunityId(community.getId())
                 .orElse(null);
         if (!ObjectUtils.isEmpty(userProfileImage)) {
@@ -80,7 +77,7 @@ public class ImageUploadService {
         }
     }
 
-    public ImageModel uploadImageToPost(MultipartFile file, Principal principal, Long postId) throws IOException {
+    public void uploadImageToPost(MultipartFile file, Principal principal, Long postId) throws IOException {
         User user = getUserByPrincipal(principal);
         List<Post> posts = new ArrayList<>(user.getPosts());
         List<Community> communities = communityRepository.findAllByOrderByName();
@@ -100,7 +97,7 @@ public class ImageUploadService {
         imageModel.setImageBytes(compressBytes(file.getBytes()));
         imageModel.setName(file.getOriginalFilename());
         LOG.info("uploading image to Post {}", post.getId());
-        return imageRepository.save(imageModel);
+        imageRepository.save(imageModel);
     }
 
     public ImageModel getImageToUser(Principal principal) {
@@ -153,7 +150,6 @@ public class ImageUploadService {
         } catch (IOException e) {
             LOG.error("cannot compress bytes");
         }
-        System.out.println("compressed image byte size - " + outputStream.toByteArray().length);
         return outputStream.toByteArray();
     }
 
@@ -191,6 +187,4 @@ public class ImageUploadService {
                 }
         );
     }
-
-
 }

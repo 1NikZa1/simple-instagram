@@ -33,7 +33,7 @@ public class UserController {
     @Autowired
     private ResponseErrorValidation responseErrorValidation;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<UserDTO> getCurrentUser(Principal principal) {
         User user = userService.getCurrentUser(principal);
         UserDTO userDTO = userFacade.userToUserDTO(user);

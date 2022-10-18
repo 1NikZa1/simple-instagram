@@ -17,6 +17,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findUserById(Long id);
 
     List<User> findAllByCommunities_id(Long communityId);
-
-
 }
