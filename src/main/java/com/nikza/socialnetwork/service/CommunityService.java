@@ -4,13 +4,13 @@ import com.nikza.socialnetwork.dto.CommunityDTO;
 import com.nikza.socialnetwork.entity.Community;
 import com.nikza.socialnetwork.entity.ImageModel;
 import com.nikza.socialnetwork.entity.User;
+import com.nikza.socialnetwork.exceptions.CommunityNotFoundException;
 import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.ImageRepository;
 import com.nikza.socialnetwork.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -26,12 +26,14 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public CommunityService(CommunityRepository communityRepository, ImageRepository imageRepository, UserRepository userRepository) {
+    public CommunityService(CommunityRepository communityRepository, ImageRepository imageRepository, UserRepository userRepository, UserService userService) {
         this.communityRepository = communityRepository;
         this.imageRepository = imageRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public List<Community> getAllCommunities() {
@@ -39,19 +41,22 @@ public class CommunityService {
     }
 
     public Community createCommunity(CommunityDTO communityDTO, Principal principal) {
-        User user = getUserByPrincipal(principal);
-        Community community = new Community();
-        community.setCreator(user);
-        community.setName(communityDTO.getName());
-        community.setDescription(communityDTO.getDescription());
+        User user = userService.getUserByPrincipal(principal);
 
         LOG.info("creating Community for User: {}", user.getEmail());
+
+        Community community = Community.builder()
+                .creator(user)
+                .name(communityDTO.getName())
+                .description(communityDTO.getDescription())
+                .build();
+
         return communityRepository.save(community);
     }
 
     public Community getCommunityById(Long communityId) {
         return communityRepository.findById(communityId)
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(() -> new CommunityNotFoundException("Community not found: " + communityId));
     }
 
     public Community updateCommunity(CommunityDTO communityDTO) {
@@ -59,24 +64,32 @@ public class CommunityService {
         community.setId(communityDTO.getId());
         community.setName(communityDTO.getName());
         community.setDescription(communityDTO.getDescription());
+
+        LOG.info("updating Community {}", community.getId());
         return communityRepository.save(community);
     }
 
     public void delete(Long communityId, Principal principal) {
-        User user = getUserByPrincipal(principal);
+        User user = userService.getUserByPrincipal(principal);
         Community community = getCommunityById(communityId);
         if (Objects.equals(user.getId(), community.getCreator().getId())) {
             Optional<ImageModel> imageModel = imageRepository.findByCommunityId(communityId);
             communityRepository.delete(community);
             imageModel.ifPresent(imageRepository::delete);
+
+            LOG.info("Community {} successfully deleted", communityId);
         }
     }
 
     public void followCommunity(Long communityId, Principal principal){
-        User user = getUserByPrincipal(principal);
+        User user = userService.getUserByPrincipal(principal);
         Community community = getCommunityById(communityId);
-        community.addUserToCommunity(user);
-        user.addCommunityToUser(community);
+
+        if (user.getCommunities().contains(community)) {
+            user.getCommunities().remove(community);
+        } else {
+            user.getCommunities().add(community);
+        }
         userRepository.save(user);
         LOG.info("followed Community: {}", community.getId());
     }
@@ -88,11 +101,5 @@ public class CommunityService {
 
     public List<User> getFollowedUsers(Long communityId){
         return userRepository.findAllByCommunities_id(communityId);
-    }
-
-    public User getUserByPrincipal(Principal principal) {
-        String username = principal.getName();
-        return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
     }
 }

@@ -1,6 +1,8 @@
 package com.nikza.socialnetwork.entity;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,9 +10,11 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 
-@Entity
 @Data
+@Entity
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Community implements Serializable {
 
     @Id
@@ -34,11 +38,6 @@ public class Community implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "community", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
-
-    public void addUserToCommunity(User user) {
-        users.add(user);
-        user.addCommunityToUser(this);
-    }
 
     @Override
     public boolean equals(Object o) {

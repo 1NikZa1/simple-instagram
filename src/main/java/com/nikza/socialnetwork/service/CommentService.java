@@ -25,19 +25,19 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public CommentService(CommentRepository commentRepository, PostRepository postRepository, UserRepository userRepository) {
+    public CommentService(CommentRepository commentRepository, PostRepository postRepository, UserService userService) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public Comment saveComment(Long postId, CommentDTO commentDTO, Principal principal) {
-        User user = getUserByPrincipal(principal);
+        User user = userService.getUserByPrincipal(principal);
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post cannot be found for user " + user.getId()));
+                .orElseThrow(() -> new PostNotFoundException("Post not found for user " + user.getId()));
         LOG.info("saving comment for Post {}", post.getId());
 
         Comment comment = Comment.builder()
@@ -52,7 +52,7 @@ public class CommentService {
 
     public List<Comment> getAllCommentsForPost(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post cannot be found: " + postId));
+                .orElseThrow(() -> new PostNotFoundException("Post not found: " + postId));
         return commentRepository.findAllByPost(post);
     }
 
@@ -60,11 +60,5 @@ public class CommentService {
         Optional<Comment> comment = commentRepository.findById(commentId);
         comment.ifPresent(commentRepository::delete);
         LOG.info("Comment {} successfully deleted", commentId);
-    }
-
-    private User getUserByPrincipal(Principal principal) {
-        String username = principal.getName();
-        return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }

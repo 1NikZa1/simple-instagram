@@ -79,9 +79,9 @@ public class UserService {
         return communityRepository.findAllByCreator_id(user.getId());
     }
 
-    private User getUserByPrincipal(Principal principal) {
+    public User getUserByPrincipal(Principal principal) {
         String username = principal.getName();
         return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }
