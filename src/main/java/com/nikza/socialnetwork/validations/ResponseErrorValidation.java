@@ -31,7 +31,5 @@ public class ResponseErrorValidation {
             return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
         }
         return null;
-
     }
-
 }

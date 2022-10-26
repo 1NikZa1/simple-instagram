@@ -32,22 +32,22 @@ public class CommentController {
 
     @PostMapping("/{postId}/create")
     public ResponseEntity<Object> createComment(@Valid @RequestBody CommentDTO commentDTO,
-                                                @PathVariable("postId") String postId,
+                                                @PathVariable("postId") Long postId,
                                                 BindingResult bindingResult,
                                                 Principal principal) {
         ResponseEntity<Object> errors = responseErrorValidation.mapValidationService(bindingResult);
 
         if (!ObjectUtils.isEmpty(errors)) return errors;
 
-        Comment comment = commentService.saveComment(Long.parseLong(postId), commentDTO, principal);
+        Comment comment = commentService.saveComment(postId, commentDTO, principal);
         CommentDTO createdComment = commentFacade.commentToCommentDTO(comment);
 
         return new ResponseEntity<>(createdComment, HttpStatus.OK);
     }
 
     @GetMapping("/{postId}/all")
-    public ResponseEntity<List<CommentDTO>> getAllCommentsToPost(@PathVariable("postId") String postId) {
-        List<CommentDTO> commentDTOList = commentService.getAllCommentsForPost(Long.parseLong(postId))
+    public ResponseEntity<List<CommentDTO>> getAllCommentsToPost(@PathVariable("postId") Long postId) {
+        List<CommentDTO> commentDTOList = commentService.getAllCommentsForPost(postId)
                 .stream()
                 .map(commentFacade::commentToCommentDTO)
                 .collect(Collectors.toList());
@@ -56,8 +56,8 @@ public class CommentController {
     }
 
     @PostMapping("/{commentId}/delete")
-    public ResponseEntity<MessageResponse> deleteComment(@PathVariable("commentId") String commentId) {
-        commentService.deleteComment(Long.parseLong(commentId));
+    public ResponseEntity<MessageResponse> deleteComment(@PathVariable("commentId") Long commentId) {
+        commentService.deleteComment(commentId);
 
         return new ResponseEntity<>(new MessageResponse("Comment was deleted"), HttpStatus.OK);
     }

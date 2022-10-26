@@ -2,12 +2,9 @@ package com.nikza.socialnetwork.web;
 
 import com.nikza.socialnetwork.dto.CommunityPostDTO;
 import com.nikza.socialnetwork.dto.PostDTO;
-import com.nikza.socialnetwork.entity.Community;
 import com.nikza.socialnetwork.entity.Post;
-import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.facade.PostFacade;
 import com.nikza.socialnetwork.payload.response.MessageResponse;
-import com.nikza.socialnetwork.service.CommunityService;
 import com.nikza.socialnetwork.service.PostService;
 import com.nikza.socialnetwork.validations.ResponseErrorValidation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.security.Principal;
@@ -52,14 +55,14 @@ public class PostController {
     public ResponseEntity<Object> createPostForCommunity(@Valid @RequestBody CommunityPostDTO postDTO,
                                                          BindingResult bindingResult,
                                                          Principal principal,
-                                                         @PathVariable("communityId") String communityId) {
+                                                         @PathVariable("communityId") Long communityId) {
         ResponseEntity<Object> errors = responseErrorValidation.mapValidationService(bindingResult);
 
         if (!ObjectUtils.isEmpty(errors)) return errors;
 
-        Post post = postService.createPostToCommunity(postDTO, Long.parseLong(communityId), principal);
+        Post post = postService.createPostToCommunity(postDTO, communityId, principal);
 
-        return post == null ? new ResponseEntity<>(HttpStatus.FORBIDDEN) : new ResponseEntity<>(postFacade.postToCommunityPostDTO(post), Objects.requireNonNull(HttpStatus.OK));
+        return new ResponseEntity<>(postFacade.postToCommunityPostDTO(post), Objects.requireNonNull(HttpStatus.OK));
     }
 
     @GetMapping("/all")
@@ -87,43 +90,39 @@ public class PostController {
                 .map(postFacade::postToPostDTO)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(postDTOList, HttpStatus.OK);
-
     }
 
     @GetMapping("/user/{userId}/posts")
-    public ResponseEntity<List<PostDTO>> getAllPostsForUserById(@PathVariable("userId") String userId) {
-        List<PostDTO> postDTOList = postService.getAllPostsForUserById(Long.parseLong(userId))
+    public ResponseEntity<List<PostDTO>> getAllPostsForUserById(@PathVariable("userId") Long userId) {
+        List<PostDTO> postDTOList = postService.getAllPostsForUserById(userId)
                 .stream()
                 .map(postFacade::postToPostDTO)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(postDTOList, HttpStatus.OK);
-
     }
 
     @GetMapping("/community/{communityId}/posts")
-    public ResponseEntity<List<CommunityPostDTO>> getAllPostsForCommunity(@PathVariable("communityId") String communityId) {
-        List<CommunityPostDTO> postDTOList = postService.getAllPostsForCommunity(Long.parseLong(communityId))
+    public ResponseEntity<List<CommunityPostDTO>> getAllPostsForCommunity(@PathVariable("communityId") Long communityId) {
+        List<CommunityPostDTO> postDTOList = postService.getAllPostsForCommunity(communityId)
                 .stream()
                 .map(postFacade::postToCommunityPostDTO)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(postDTOList, HttpStatus.OK);
-
     }
 
     @PostMapping("/{postId}/{username}/like")
-    public ResponseEntity<PostDTO> likePost(@PathVariable("postId") String postId,
-                                            @PathVariable("username") String username) {
-        Post post = postService.likePost(Long.parseLong(postId), username);
+    public ResponseEntity<PostDTO> likePost(@PathVariable("postId") Long postId,
+                                            Principal principal) {
+        Post post = postService.likePost(postId, principal);
         PostDTO postDTO = postFacade.postToPostDTO(post);
 
         return new ResponseEntity<>(postDTO, HttpStatus.OK);
-
     }
 
     @PostMapping("/{postId}/delete")
-    public ResponseEntity<MessageResponse> deletePost(@PathVariable("postId") String postId,
+    public ResponseEntity<MessageResponse> deletePost(@PathVariable("postId") Long postId,
                                                       Principal principal) {
-        postService.deletePost(Long.parseLong(postId), principal);
+        postService.deletePost(postId, principal);
 
         return new ResponseEntity<>(new MessageResponse("Post was deleted"), HttpStatus.OK);
     }

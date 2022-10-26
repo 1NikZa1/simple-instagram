@@ -7,15 +7,14 @@ import com.nikza.socialnetwork.entity.ImageModel;
 import com.nikza.socialnetwork.entity.Post;
 import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.exceptions.CommunityNotFoundException;
+import com.nikza.socialnetwork.exceptions.NoAccessException;
 import com.nikza.socialnetwork.exceptions.PostNotFoundException;
 import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.ImageRepository;
 import com.nikza.socialnetwork.repository.PostRepository;
-import com.nikza.socialnetwork.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -62,20 +61,19 @@ public class PostService {
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
 
-        Post post = null;
-        if (user.getId().equals(community.getCreator().getId())) {
-            post = Post.builder()
-                    .community(community)
-                    .caption(postDTO.getCaption())
-                    .location(postDTO.getLocation())
-                    .title(postDTO.getTitle())
-                    .likes(0)
-                    .build();
+        if (!user.getId().equals(community.getCreator().getId()))
+            throw new NoAccessException("User " + user.getId() + " is not a Community creator");
 
-            post = postRepository.save(post);
-            LOG.info("Saving Post for Group: {}", communityId);
-        }
-        return post;
+        Post post = Post.builder()
+                .community(community)
+                .caption(postDTO.getCaption())
+                .location(postDTO.getLocation())
+                .title(postDTO.getTitle())
+                .likes(0)
+                .build();
+
+        LOG.info("Saving Post for Group: {}", communityId);
+        return postRepository.save(post);
     }
 
     public List<Post> getAllPosts() {
@@ -112,21 +110,22 @@ public class PostService {
         return postRepository.findAllByCommunityOrderByCreatedDate(communityRepository.getReferenceById(communityId));
     }
 
-    public Post likePost(Long postId, String username) {
+    public Post likePost(Long postId, Principal principal) {
+        User user = userService.getUserByPrincipal(principal);
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post cannot be found "));
+                .orElseThrow(() -> new PostNotFoundException("Post " + postId + " not found"));
 
         Optional<String> userLiked = post.getLikedUsers()
                 .stream()
-                .filter(u -> u.equals(username))
+                .filter(u -> u.equals(user.getUsername()))
                 .findAny();
 
         if (userLiked.isPresent()) {
             post.setLikes(post.getLikes() - 1);
-            post.getLikedUsers().remove(username);
+            post.getLikedUsers().remove(user.getUsername());
         } else {
             post.setLikes(post.getLikes() + 1);
-            post.getLikedUsers().add(username);
+            post.getLikedUsers().add(user.getUsername());
         }
         return postRepository.save(post);
     }

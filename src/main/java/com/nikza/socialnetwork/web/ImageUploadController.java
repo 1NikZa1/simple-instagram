@@ -29,19 +29,19 @@ public class ImageUploadController {
     }
 
     @PostMapping("/{postId}/upload")
-    public ResponseEntity<MessageResponse> uploadImageToPost(@PathVariable("postId") String postId,
+    public ResponseEntity<MessageResponse> uploadImageToPost(@PathVariable("postId") Long postId,
                                                              @RequestParam("file") MultipartFile file,
                                                              Principal principal) throws IOException{
-        imageUploadService.uploadImageToPost(file, principal, Long.parseLong(postId));
+        imageUploadService.uploadImageToPost(file, principal, postId);
 
         return new ResponseEntity<>(new MessageResponse("Image upload successfully to post"), HttpStatus.OK);
     }
 
     @PostMapping("community/{communityId}/upload")
-    public ResponseEntity<MessageResponse> uploadImageToCommunity(@PathVariable("communityId") String communityId,
+    public ResponseEntity<MessageResponse> uploadImageToCommunity(@PathVariable("communityId") Long communityId,
                                                              @RequestParam("file") MultipartFile file,
                                                              Principal principal) throws IOException{
-        imageUploadService.uploadImageToCommunity(file, principal, Long.parseLong(communityId));
+        imageUploadService.uploadImageToCommunity(file, principal, communityId);
 
         return new ResponseEntity<>(new MessageResponse("Image upload successfully"), HttpStatus.OK);
     }
@@ -54,22 +54,22 @@ public class ImageUploadController {
     }
 
     @GetMapping("/profileImage/{userId}")
-    public ResponseEntity<ImageModel> getImageToUserById(@PathVariable("userId") String userId){
-        ImageModel userImage = imageUploadService.getImageToUserById(Long.parseLong(userId));
+    public ResponseEntity<ImageModel> getImageToUserById(@PathVariable("userId") Long userId){
+        ImageModel userImage = imageUploadService.getImageToUserById(userId);
 
         return new ResponseEntity<>(userImage, HttpStatus.OK);
     }
 
     @GetMapping("/community/{communityId}/image")
-    public ResponseEntity<ImageModel> getImageToCommunity(@PathVariable("communityId") String communityId){
-        ImageModel communityImage = imageUploadService.getImageToCommunity(Long.parseLong(communityId));
+    public ResponseEntity<ImageModel> getImageToCommunity(@PathVariable("communityId") Long communityId){
+        ImageModel communityImage = imageUploadService.getImageToCommunity(communityId);
 
         return new ResponseEntity<>(communityImage, HttpStatus.OK);
     }
 
     @GetMapping("/{postId}/image")
-    public ResponseEntity<ImageModel> getImageToPost(@PathVariable("postId") String postId){
-        ImageModel postImage = imageUploadService.getImageToPost(Long.parseLong(postId));
+    public ResponseEntity<ImageModel> getImageToPost(@PathVariable("postId") Long postId){
+        ImageModel postImage = imageUploadService.getImageToPost(postId);
 
         return new ResponseEntity<>(postImage, HttpStatus.OK);
     }

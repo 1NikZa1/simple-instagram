@@ -45,8 +45,8 @@ public class CommunityController {
     }
 
     @GetMapping("/{communityId}/followed")
-    public ResponseEntity<List<UserDTO>> getFollowedUsers(@PathVariable("communityId") String communnityId) {
-        List<UserDTO> followedUsers = communityService.getFollowedUsers(Long.parseLong(communnityId))
+    public ResponseEntity<List<UserDTO>> getFollowedUsers(@PathVariable("communityId") Long communityId) {
+        List<UserDTO> followedUsers = communityService.getFollowedUsers(communityId)
                 .stream()
                 .map(userFacade::userToUserDTO)
                 .collect(Collectors.toList());
@@ -54,16 +54,15 @@ public class CommunityController {
     }
 
     @GetMapping("/{communityId}/follow")
-    public ResponseEntity<MessageResponse> followCommunity(@PathVariable("communityId") String communityId,
+    public ResponseEntity<MessageResponse> followCommunity(@PathVariable("communityId") Long communityId,
                                                               Principal principal) {
-        communityService.followCommunity(Long.parseLong(communityId), principal);
+        communityService.followCommunity(communityId, principal);
         return new ResponseEntity<>(new MessageResponse("subscribed successfully"), HttpStatus.OK);
     }
 
     @GetMapping("/{communityId}/admin")
-    public ResponseEntity<UserDTO> getAdmin(@PathVariable("communityId") String communityId,
-                                                           Principal principal) {
-        User user = communityService.getAdmin(Long.parseLong(communityId));
+    public ResponseEntity<UserDTO> getAdmin(@PathVariable("communityId") Long communityId) {
+        User user = communityService.getAdmin(communityId);
         return new ResponseEntity<>(userFacade.userToUserDTO(user), HttpStatus.OK);
     }
 
@@ -81,8 +80,8 @@ public class CommunityController {
     }
 
     @GetMapping("/{communityId}")
-    public ResponseEntity<CommunityDTO> getCommunityProfile(@PathVariable("communityId") String communityId) {
-        Community community = communityService.getCommunityById(Long.parseLong(communityId));
+    public ResponseEntity<CommunityDTO> getCommunityProfile(@PathVariable("communityId") Long communityId) {
+        Community community = communityService.getCommunityById(communityId);
         CommunityDTO communityDTO = communityFacade.communityToCommunityDTO(community);
 
         return new ResponseEntity<>(communityDTO, HttpStatus.OK);
@@ -92,29 +91,22 @@ public class CommunityController {
     public ResponseEntity<Object> updateCommunity(@Valid @RequestBody CommunityDTO communityDTO,
                                                   BindingResult bindingResult,
                                                   Principal principal,
-                                                  @PathVariable("communityId") String communityId) {
+                                                  @PathVariable("communityId") Long communityId) {
 
         ResponseEntity<Object> errors = responseErrorValidation.mapValidationService(bindingResult);
 
         if (!ObjectUtils.isEmpty(errors)) return errors;
 
-        User user = communityService.getUserByPrincipal(principal);
-        Community community = communityService.getCommunityById(Long.parseLong(communityId));
+        communityDTO.setId(communityId);
+        Community community = communityService.updateCommunity(communityDTO, principal);
 
-        if (user.getId().equals(community.getCreator().getId())) {
-            communityDTO.setId(community.getId());
-            community = communityService.updateCommunity(communityDTO);
-        }
-
-        CommunityDTO communityUpdated = communityFacade.communityToCommunityDTO(community);
-
-        return new ResponseEntity<>(communityUpdated, HttpStatus.OK);
+        return new ResponseEntity<>(communityFacade.communityToCommunityDTO(community), HttpStatus.OK);
     }
 
     @PostMapping("/{communityId}/delete")
-    public ResponseEntity<MessageResponse> deleteCommunity(@PathVariable("communityId") String communityId,
+    public ResponseEntity<MessageResponse> deleteCommunity(@PathVariable("communityId") Long communityId,
                                                       Principal principal) {
-        communityService.delete(Long.parseLong(communityId), principal);
+        communityService.delete(communityId, principal);
 
         return new ResponseEntity<>(new MessageResponse("Community was deleted"), HttpStatus.OK);
     }

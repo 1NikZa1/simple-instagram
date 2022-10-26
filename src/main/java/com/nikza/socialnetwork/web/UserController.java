@@ -42,8 +42,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserDTO> getUserProfile(@PathVariable("userId") String userId) {
-        User user = userService.getUserById(Long.parseLong(userId));
+    public ResponseEntity<UserDTO> getUserProfile(@PathVariable("userId") Long userId) {
+        User user = userService.getUserById(userId);
         UserDTO userDTO = userFacade.userToUserDTO(user);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
@@ -82,5 +82,4 @@ public class UserController {
 
         return new ResponseEntity<>(userUpdated, HttpStatus.OK);
     }
-
 }
