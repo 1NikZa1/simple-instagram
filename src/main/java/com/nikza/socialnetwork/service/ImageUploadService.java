@@ -7,11 +7,9 @@ import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.exceptions.ImageNotFoundException;
 import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.ImageRepository;
-import com.nikza.socialnetwork.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,19 +31,20 @@ public class ImageUploadService {
     public static final Logger LOG = LoggerFactory.getLogger(ImageUploadService.class);
 
     private final ImageRepository imageRepository;
-    private final UserRepository userRepository;
     private final CommunityRepository communityRepository;
+    private final UserService userService;
+
 
     @Autowired
-    public ImageUploadService(ImageRepository imageRepository, UserRepository userRepository, CommunityRepository communityRepository) {
+    public ImageUploadService(ImageRepository imageRepository, CommunityRepository communityRepository, UserService userService) {
         this.imageRepository = imageRepository;
-        this.userRepository = userRepository;
         this.communityRepository = communityRepository;
+        this.userService = userService;
     }
 
     public void uploadImageToUser(MultipartFile file, Principal principal) throws IOException {
-        User user = getUserByPrincipal(principal);
-        LOG.info("uploading image profile to User {}", user.getUsername());
+        User user = userService.getUserByPrincipal(principal);
+        LOG.info("Uploading image profile to User {}", user.getId());
 
         ImageModel userProfileImage = imageRepository.findByUserId(user.getId())
                 .orElse(null);
@@ -60,25 +59,28 @@ public class ImageUploadService {
     }
 
     public void uploadImageToCommunity(MultipartFile file, Principal principal, Long communityId) throws IOException {
-        User user = getUserByPrincipal(principal);
+        User user = userService.getUserByPrincipal(principal);
         Community community = communityRepository.getReferenceById(communityId);
-        ImageModel userProfileImage = imageRepository.findByCommunityId(community.getId())
-                .orElse(null);
-        if (!ObjectUtils.isEmpty(userProfileImage)) {
-            imageRepository.delete(userProfileImage);
-        }
+
         if (user.getId().equals(community.getCreator().getId())) {
+            ImageModel communityImage = imageRepository.findByCommunityId(community.getId())
+                    .orElse(null);
+
+            if (!ObjectUtils.isEmpty(communityImage)) {
+                imageRepository.delete(communityImage);
+            }
+
             ImageModel imageModel = new ImageModel();
             imageModel.setCommunityId(community.getId());
             imageModel.setImageBytes(compressBytes(file.getBytes()));
             imageModel.setName(file.getOriginalFilename());
-            LOG.info("uploading image to Community {}", community.getId());
+            LOG.info("Uploading image to Community {}", community.getId());
             imageRepository.save(imageModel);
         }
     }
 
     public void uploadImageToPost(MultipartFile file, Principal principal, Long postId) throws IOException {
-        User user = getUserByPrincipal(principal);
+        User user = userService.getUserByPrincipal(principal);
         List<Post> posts = new ArrayList<>(user.getPosts());
         List<Community> communities = communityRepository.findAllByOrderByName();
 
@@ -96,12 +98,12 @@ public class ImageUploadService {
         imageModel.setPostId(post.getId());
         imageModel.setImageBytes(compressBytes(file.getBytes()));
         imageModel.setName(file.getOriginalFilename());
-        LOG.info("uploading image to Post {}", post.getId());
+        LOG.info("Uploading image to Post {}", post.getId());
         imageRepository.save(imageModel);
     }
 
     public ImageModel getImageToUser(Principal principal) {
-        User user = getUserByPrincipal(principal);
+        User user = userService.getUserByPrincipal(principal);
         ImageModel imageModel = imageRepository.findByUserId(user.getId()).orElse(null);
         if (!ObjectUtils.isEmpty(imageModel)) {
             imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
@@ -119,7 +121,7 @@ public class ImageUploadService {
 
     public ImageModel getImageToPost(Long postId) {
         ImageModel imageModel = imageRepository.findByPostId(postId)
-                .orElseThrow(() -> new ImageNotFoundException("cannot find image to Post: " + postId));
+                .orElseThrow(() -> new ImageNotFoundException("Not found image to Post: " + postId));
         if (!ObjectUtils.isEmpty(imageModel)) {
             imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
         }
@@ -128,7 +130,7 @@ public class ImageUploadService {
 
     public ImageModel getImageToCommunity(Long communityId) {
         ImageModel imageModel = imageRepository.findByCommunityId(communityId)
-                .orElseThrow(() -> new ImageNotFoundException("cannot find image to Community: " + communityId));
+                .orElseThrow(() -> new ImageNotFoundException("Not found image to Community: " + communityId));
         if (!ObjectUtils.isEmpty(imageModel)) {
             imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
         }
@@ -168,12 +170,6 @@ public class ImageUploadService {
             LOG.error("cannot decompress bytes");
         }
         return outputStream.toByteArray();
-    }
-
-    private User getUserByPrincipal(Principal principal) {
-        String username = principal.getName();
-        return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
     }
 
     private <T> Collector<T, ?, T> toSinglePostCollector() {
