@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/comment")
@@ -50,7 +49,7 @@ public class CommentController {
         List<CommentDTO> commentDTOList = commentService.getAllCommentsForPost(postId)
                 .stream()
                 .map(commentFacade::commentToCommentDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         return new ResponseEntity<>(commentDTOList, HttpStatus.OK);
     }

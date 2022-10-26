@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/community")
@@ -40,7 +39,7 @@ public class CommunityController {
         List<CommunityDTO> communityDTOList = communityService.getAllCommunities()
                 .stream()
                 .map(communityFacade::communityToCommunityDTO)
-                .collect(Collectors.toList());
+                .toList();
         return new ResponseEntity<>(communityDTOList, HttpStatus.OK);
     }
 
@@ -49,7 +48,7 @@ public class CommunityController {
         List<UserDTO> followedUsers = communityService.getFollowedUsers(communityId)
                 .stream()
                 .map(userFacade::userToUserDTO)
-                .collect(Collectors.toList());
+                .toList();
         return new ResponseEntity<>(followedUsers, HttpStatus.OK);
     }
 

@@ -24,7 +24,6 @@ import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/post")
@@ -70,7 +69,7 @@ public class PostController {
         List<PostDTO> postDTOList = postService.getAllPosts()
                 .stream()
                 .map(postFacade::postToPostDTO)
-                .collect(Collectors.toList());
+                .toList();
         return new ResponseEntity<>(postDTOList, HttpStatus.OK);
     }
 
@@ -79,7 +78,7 @@ public class PostController {
         List<PostDTO> postDTOList = postService.getAllPostsFromFollowedCommunities(principal)
                 .stream()
                 .map(postFacade::postToPostDTO)
-                .collect(Collectors.toList());
+                .toList();
         return new ResponseEntity<>(postDTOList, HttpStatus.OK);
     }
 
@@ -88,7 +87,7 @@ public class PostController {
         List<PostDTO> postDTOList = postService.getAllPostsForUser(principal)
                 .stream()
                 .map(postFacade::postToPostDTO)
-                .collect(Collectors.toList());
+                .toList();
         return new ResponseEntity<>(postDTOList, HttpStatus.OK);
     }
 
@@ -97,7 +96,7 @@ public class PostController {
         List<PostDTO> postDTOList = postService.getAllPostsForUserById(userId)
                 .stream()
                 .map(postFacade::postToPostDTO)
-                .collect(Collectors.toList());
+                .toList();
         return new ResponseEntity<>(postDTOList, HttpStatus.OK);
     }
 
@@ -106,11 +105,11 @@ public class PostController {
         List<CommunityPostDTO> postDTOList = postService.getAllPostsForCommunity(communityId)
                 .stream()
                 .map(postFacade::postToCommunityPostDTO)
-                .collect(Collectors.toList());
+                .toList();
         return new ResponseEntity<>(postDTOList, HttpStatus.OK);
     }
 
-    @PostMapping("/{postId}/{username}/like")
+    @PostMapping("/{postId}/like")
     public ResponseEntity<PostDTO> likePost(@PathVariable("postId") Long postId,
                                             Principal principal) {
         Post post = postService.likePost(postId, principal);

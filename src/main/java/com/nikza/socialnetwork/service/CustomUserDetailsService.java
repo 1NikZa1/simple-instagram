@@ -3,7 +3,6 @@ package com.nikza.socialnetwork.service;
 import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,7 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -28,9 +26,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findUserByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
 
-        List<GrantedAuthority> grantedAuthorities = user.getRole().stream()
+        List<SimpleGrantedAuthority> grantedAuthorities = user.getRole().stream()
                 .map(role -> new SimpleGrantedAuthority(role.name()))
-                .collect(Collectors.toList());
+                .toList();
 
         return User.builder()
                 .id(user.getId())

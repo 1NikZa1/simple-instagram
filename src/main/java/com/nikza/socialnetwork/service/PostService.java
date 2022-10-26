@@ -18,11 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -99,11 +97,10 @@ public class PostService {
         User user = userService.getUserByPrincipal(principal);
         List<Community> communities = communityRepository.findAllByUsers_id(user.getId());
 
-        List<Post> posts = communities.stream()
+        return communities.stream()
                 .flatMap(community -> postRepository.findAllByCommunityOrderByCreatedDate(community).stream())
-                .sorted(Comparator.comparing(Post::getCreatedDate)).collect(Collectors.toList());
-        Collections.reverse(posts);
-        return posts;
+                .sorted(Comparator.comparing(Post::getCreatedDate))
+                .toList();
     }
 
     public List<Post> getAllPostsForCommunity(Long communityId) {

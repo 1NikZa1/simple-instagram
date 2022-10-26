@@ -19,7 +19,7 @@ public class SignupRequest {
     private String firstname;
     @NotEmpty(message = "enter lastname")
     private String lastname;
-    @NotEmpty(message = "enter usertname")
+    @NotEmpty(message = "enter username")
     private  String username;
     @NotEmpty(message = "enter password")
     @Size(min = 6)

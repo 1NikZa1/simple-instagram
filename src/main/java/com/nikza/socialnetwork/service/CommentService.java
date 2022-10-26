@@ -7,11 +7,9 @@ import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.exceptions.PostNotFoundException;
 import com.nikza.socialnetwork.repository.CommentRepository;
 import com.nikza.socialnetwork.repository.PostRepository;
-import com.nikza.socialnetwork.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;

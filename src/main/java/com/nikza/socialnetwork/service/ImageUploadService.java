@@ -86,7 +86,7 @@ public class ImageUploadService {
 
         List<Post> communityPostList = communities.stream()
                 .flatMap(e -> e.getPosts().stream())
-                .collect(Collectors.toList());
+                .toList();
 
         posts.addAll(communityPostList);
 
