@@ -31,21 +31,20 @@ public class PostService {
     public static final Logger LOG = LoggerFactory.getLogger(PostService.class);
 
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final CommunityRepository communityRepository;
-
+    private final UserService userService;
 
     @Autowired
-    public PostService(PostRepository postRepository, UserRepository userRepository, ImageRepository imageRepository, CommunityRepository communityRepository) {
+    public PostService(PostRepository postRepository, ImageRepository imageRepository, CommunityRepository communityRepository, UserService userService) {
         this.postRepository = postRepository;
-        this.userRepository = userRepository;
         this.imageRepository = imageRepository;
         this.communityRepository = communityRepository;
+        this.userService = userService;
     }
 
     public Post createPostToUser(PostDTO postDTO, Principal principal) {
-        User user = getUserByPrincipal(principal);
+        User user = userService.getUserByPrincipal(principal);
         Post post = Post.builder()
                 .user(user)
                 .caption(postDTO.getCaption())
@@ -54,24 +53,29 @@ public class PostService {
                 .likes(0)
                 .build();
 
-        LOG.info("saving Post for User: {}", user.getEmail());
+        LOG.info("Saving Post for User: {}", user.getId());
         return postRepository.save(post);
     }
 
-    public Post createPostToCommunity(CommunityPostDTO postDTO, Long communityId) {
+    public Post createPostToCommunity(CommunityPostDTO postDTO, Long communityId, Principal principal) {
+        User user = userService.getUserByPrincipal(principal);
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
 
-        Post post = Post.builder()
-                .community(community)
-                .caption(postDTO.getCaption())
-                .location(postDTO.getLocation())
-                .title(postDTO.getTitle())
-                .likes(0)
-                .build();
+        Post post = null;
+        if (user.getId().equals(community.getCreator().getId())) {
+            post = Post.builder()
+                    .community(community)
+                    .caption(postDTO.getCaption())
+                    .location(postDTO.getLocation())
+                    .title(postDTO.getTitle())
+                    .likes(0)
+                    .build();
 
-        LOG.info("saving Post for Group with id: {}", communityId);
-        return postRepository.save(post);
+            post = postRepository.save(post);
+            LOG.info("Saving Post for Group: {}", communityId);
+        }
+        return post;
     }
 
     public List<Post> getAllPosts() {
@@ -79,13 +83,13 @@ public class PostService {
     }
 
     public Post getPostById(Long postId, Principal principal) {
-        User user = getUserByPrincipal(principal);
+        User user = userService.getUserByPrincipal(principal);
         return postRepository.findPostByIdAndUser(postId, user)
                 .orElseThrow(() -> new PostNotFoundException("Post cannot be found for User " + user.getId()));
     }
 
     public List<Post> getAllPostsForUser(Principal principal) {
-        User user = getUserByPrincipal(principal);
+        User user = userService.getUserByPrincipal(principal);
         return postRepository.findAllByUserOrderByCreatedDate(user);
     }
 
@@ -94,7 +98,7 @@ public class PostService {
     }
 
     public List<Post> getAllPostsFromFollowedCommunities(Principal principal) {
-        User user = getUserByPrincipal(principal);
+        User user = userService.getUserByPrincipal(principal);
         List<Community> communities = communityRepository.findAllByUsers_id(user.getId());
 
         List<Post> posts = communities.stream()
@@ -132,11 +136,6 @@ public class PostService {
         Optional<ImageModel> imageModel = imageRepository.findByPostId(post.getId());
         postRepository.delete(post);
         imageModel.ifPresent(imageRepository::delete);
-    }
-
-    public User getUserByPrincipal(Principal principal) {
-        String username = principal.getName();
-        return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+        LOG.info("Post {} was deleted", postId);
     }
 }

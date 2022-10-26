@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -31,8 +32,6 @@ public class PostController {
     private PostService postService;
     @Autowired
     private PostFacade postFacade;
-    @Autowired
-    private CommunityService communityService;
     @Autowired
     private ResponseErrorValidation responseErrorValidation;
 
@@ -58,16 +57,9 @@ public class PostController {
 
         if (!ObjectUtils.isEmpty(errors)) return errors;
 
-        User user = postService.getUserByPrincipal(principal);
-        Community community = communityService.getCommunityById(Long.parseLong(communityId));
-        CommunityPostDTO createdPost = null;
+        Post post = postService.createPostToCommunity(postDTO, Long.parseLong(communityId), principal);
 
-        if (user.getId().equals(community.getCreator().getId())){
-            Post post = postService.createPostToCommunity(postDTO, Long.parseLong(communityId));
-            createdPost = postFacade.postToCommunityPostDTO(post);
-        }
-
-        return new ResponseEntity<>(createdPost, HttpStatus.OK);
+        return post == null ? new ResponseEntity<>(HttpStatus.FORBIDDEN) : new ResponseEntity<>(postFacade.postToCommunityPostDTO(post), Objects.requireNonNull(HttpStatus.OK));
     }
 
     @GetMapping("/all")
