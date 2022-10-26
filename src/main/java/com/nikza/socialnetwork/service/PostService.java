@@ -6,6 +6,7 @@ import com.nikza.socialnetwork.entity.Community;
 import com.nikza.socialnetwork.entity.ImageModel;
 import com.nikza.socialnetwork.entity.Post;
 import com.nikza.socialnetwork.entity.User;
+import com.nikza.socialnetwork.exceptions.CommunityNotFoundException;
 import com.nikza.socialnetwork.exceptions.PostNotFoundException;
 import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.ImageRepository;
@@ -45,24 +46,29 @@ public class PostService {
 
     public Post createPostToUser(PostDTO postDTO, Principal principal) {
         User user = getUserByPrincipal(principal);
-        Post post = new Post();
-        post.setUser(user);
-        post.setCaption(postDTO.getCaption());
-        post.setLocation(postDTO.getLocation());
-        post.setTitle(postDTO.getTitle());
-        post.setLikes(0);
+        Post post = Post.builder()
+                .user(user)
+                .caption(postDTO.getCaption())
+                .location(postDTO.getLocation())
+                .title(postDTO.getTitle())
+                .likes(0)
+                .build();
 
         LOG.info("saving Post for User: {}", user.getEmail());
         return postRepository.save(post);
     }
 
-    public Post createPostToGroup(CommunityPostDTO postDTO, Long communityId) {
-        Post post = new Post();
-        post.setCommunity(communityRepository.findById(communityId).orElse(null));
-        post.setCaption(postDTO.getCaption());
-        post.setLocation(postDTO.getLocation());
-        post.setTitle(postDTO.getTitle());
-        post.setLikes(0);
+    public Post createPostToCommunity(CommunityPostDTO postDTO, Long communityId) {
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
+
+        Post post = Post.builder()
+                .community(community)
+                .caption(postDTO.getCaption())
+                .location(postDTO.getLocation())
+                .title(postDTO.getTitle())
+                .likes(0)
+                .build();
 
         LOG.info("saving Post for Group with id: {}", communityId);
         return postRepository.save(post);
@@ -75,7 +81,7 @@ public class PostService {
     public Post getPostById(Long postId, Principal principal) {
         User user = getUserByPrincipal(principal);
         return postRepository.findPostByIdAndUser(postId, user)
-                .orElseThrow(() -> new PostNotFoundException("Post cannot be found for User " + user.getEmail()));
+                .orElseThrow(() -> new PostNotFoundException("Post cannot be found for User " + user.getId()));
     }
 
     public List<Post> getAllPostsForUser(Principal principal) {

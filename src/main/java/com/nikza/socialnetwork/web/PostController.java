@@ -63,7 +63,7 @@ public class PostController {
         CommunityPostDTO createdPost = null;
 
         if (user.getId().equals(community.getCreator().getId())){
-            Post post = postService.createPostToGroup(postDTO, Long.parseLong(communityId));
+            Post post = postService.createPostToCommunity(postDTO, Long.parseLong(communityId));
             createdPost = postFacade.postToCommunityPostDTO(post);
         }
 
