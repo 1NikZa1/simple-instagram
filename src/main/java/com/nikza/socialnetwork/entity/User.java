@@ -1,6 +1,8 @@
 package com.nikza.socialnetwork.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,9 +12,11 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Entity(name = "users")
 @Data
+@Entity(name = "users")
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class User implements UserDetails {
 
     @Id
