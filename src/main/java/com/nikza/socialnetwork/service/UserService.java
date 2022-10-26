@@ -43,7 +43,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(userIn.getPassword()));
         user.getRole().add(Role.ROLE_USER);
         try {
-            LOG.info("saving user {}", userIn.getEmail());
+            LOG.info("Saving User {}", userIn.getEmail());
             userRepository.save(user);
         } catch (Exception ex) {
             LOG.error("error of reg.{}", ex.getMessage());

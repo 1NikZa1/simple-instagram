@@ -38,7 +38,7 @@ public class CommentService {
         User user = userService.getUserByPrincipal(principal);
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found for user " + user.getId()));
-        LOG.info("saving comment for Post {}", post.getId());
+        LOG.info("Saving comment for Post {}", post.getId());
 
         Comment comment = Comment.builder()
                 .post(post)
