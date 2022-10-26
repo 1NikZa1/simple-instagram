@@ -5,6 +5,7 @@ import com.nikza.socialnetwork.entity.Community;
 import com.nikza.socialnetwork.entity.ImageModel;
 import com.nikza.socialnetwork.entity.User;
 import com.nikza.socialnetwork.exceptions.CommunityNotFoundException;
+import com.nikza.socialnetwork.exceptions.NoAccessException;
 import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.ImageRepository;
 import com.nikza.socialnetwork.repository.UserRepository;
@@ -59,13 +60,18 @@ public class CommunityService {
                 .orElseThrow(() -> new CommunityNotFoundException("Community not found: " + communityId));
     }
 
-    public Community updateCommunity(CommunityDTO communityDTO) {
+    public Community updateCommunity(CommunityDTO communityDTO, Principal principal) {
+        User user = userService.getUserByPrincipal(principal);
         Community community = getCommunityById(communityDTO.getId());
+
+        if (!user.getId().equals(community.getCreator().getId()))
+            throw new NoAccessException("User " + user.getId() + " is not a Community creator");
+
         community.setId(communityDTO.getId());
         community.setName(communityDTO.getName());
         community.setDescription(communityDTO.getDescription());
 
-        LOG.info("updating Community {}", community.getId());
+        LOG.info("Updating Community {}", community.getId());
         return communityRepository.save(community);
     }
 
@@ -81,7 +87,7 @@ public class CommunityService {
         }
     }
 
-    public void followCommunity(Long communityId, Principal principal){
+    public void followCommunity(Long communityId, Principal principal) {
         User user = userService.getUserByPrincipal(principal);
         Community community = getCommunityById(communityId);
 
@@ -94,12 +100,12 @@ public class CommunityService {
         LOG.info("followed Community: {}", community.getId());
     }
 
-    public User getAdmin(Long communityId){
+    public User getAdmin(Long communityId) {
         Community community = getCommunityById(communityId);
         return community.getCreator();
     }
 
-    public List<User> getFollowedUsers(Long communityId){
+    public List<User> getFollowedUsers(Long communityId) {
         return userRepository.findAllByCommunities_id(communityId);
     }
 }
