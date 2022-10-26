@@ -88,15 +88,6 @@ public class User implements UserDetails {
         this.authorities = authorities;
     }
 
-    public void addCommunityToUser(Community community) {
-        if (communities.contains(community)) {
-            communities.remove(community);
-        } else {
-            communities.add(community);
-            community.addUserToCommunity(this);
-        }
-    }
-
     @PrePersist
     protected void onCreate() {
         this.createdDate = LocalDateTime.now();
