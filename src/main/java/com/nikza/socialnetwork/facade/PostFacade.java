@@ -1,5 +1,6 @@
 package com.nikza.socialnetwork.facade;
 
+import com.nikza.socialnetwork.dto.CommentDTO;
 import com.nikza.socialnetwork.dto.CommunityPostDTO;
 import com.nikza.socialnetwork.dto.PostDTO;
 import com.nikza.socialnetwork.entity.Post;
@@ -21,6 +22,8 @@ public class PostFacade {
         postDTO.setUsersLiked(post.getLikedUsers());
         postDTO.setLocation(post.getLocation());
         postDTO.setTitle(post.getTitle());
+        postDTO.setComments(post.getComments());
+        postDTO.setCreatedDate(post.getCreatedDate());
         return postDTO;
     }
 

@@ -93,6 +93,10 @@ public class PostService {
         return postRepository.findAllByUser_idOrderByCreatedDate(userId);
     }
 
+    public List<Post> getAllPostsForUserByUsername(String username) {
+        return postRepository.findAllByUser_usernameOrderByCreatedDate(username);
+    }
+
     public List<Post> getAllPostsFromFollowedCommunities(Principal principal) {
         User user = userService.getUserByPrincipal(principal);
         List<Community> communities = communityRepository.findAllByUsers_id(user.getId());

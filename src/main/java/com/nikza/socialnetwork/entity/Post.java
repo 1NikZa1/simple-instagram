@@ -1,5 +1,6 @@
 package com.nikza.socialnetwork.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,6 +40,7 @@ public class Post implements Serializable {
     private Community community;
 
     @OneToMany(cascade = CascadeType.REFRESH,fetch = FetchType.EAGER,mappedBy = "post",orphanRemoval = true)
+    @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
     @Column(updatable = false)
@@ -47,5 +49,12 @@ public class Post implements Serializable {
     @PrePersist
     protected void onCreate() {
         this.createdDate = LocalDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                '}';
     }
 }
