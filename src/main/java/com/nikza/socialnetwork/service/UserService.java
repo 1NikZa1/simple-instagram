@@ -69,6 +69,15 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
     }
 
+    public User getUserByUsername(String username) {
+        return userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
     public List<Community> getCommunitiesFollowedByUser(Principal principal) {
         User user = getUserByPrincipal(principal);
         return communityRepository.findAllByUsers_id(user.getId());

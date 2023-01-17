@@ -1,5 +1,6 @@
 package com.nikza.socialnetwork.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class Comment implements Serializable {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JsonBackReference
     private Post post;
 
     @ManyToOne(fetch = FetchType.EAGER)

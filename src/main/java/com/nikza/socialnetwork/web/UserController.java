@@ -41,9 +41,26 @@ public class UserController {
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserDTO> getUserProfile(@PathVariable("userId") Long userId) {
-        User user = userService.getUserById(userId);
+    @GetMapping("/all")
+    public ResponseEntity<List<UserDTO>> getAllUsers(Principal principal) {
+        List<UserDTO> users = userService.getAllUsers().
+                stream()
+                .map(userFacade::userToUserDTO)
+                .toList();
+
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+//    @GetMapping("/{userId}")
+//    public ResponseEntity<UserDTO> getUserProfile(@PathVariable("userId") Long userId) {
+//        User user = userService.getUserById(userId);
+//        UserDTO userDTO = userFacade.userToUserDTO(user);
+//        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+//    }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<UserDTO> getUserProfile(@PathVariable("username") String username) {
+        User user = userService.getUserByUsername(username);
         UserDTO userDTO = userFacade.userToUserDTO(user);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
@@ -53,7 +70,7 @@ public class UserController {
         List<CommunityDTO> communityDTOList = userService.getCommunitiesFollowedByUser(principal)
                 .stream()
                 .map(communityFacade::communityToCommunityDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         return new ResponseEntity<>(communityDTOList, HttpStatus.OK);
     }
@@ -63,7 +80,7 @@ public class UserController {
         List<CommunityDTO> communityDTOList = userService.getCommunitiesCreatedByUser(principal)
                 .stream()
                 .map(communityFacade::communityToCommunityDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         return new ResponseEntity<>(communityDTOList, HttpStatus.OK);
     }
