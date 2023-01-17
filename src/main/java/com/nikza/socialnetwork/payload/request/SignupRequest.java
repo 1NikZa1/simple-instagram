@@ -24,6 +24,6 @@ public class SignupRequest {
     @NotEmpty(message = "enter password")
     @Size(min = 6)
     private String password;
-    @NotEmpty(message = "confirm firstname")
+    @NotEmpty(message = "confirm password")
     private String confirmPassword;
 }
