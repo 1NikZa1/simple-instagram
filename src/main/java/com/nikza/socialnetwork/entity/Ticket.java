@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -35,7 +37,6 @@ public class Ticket implements Serializable {
     private Long id;
     private String title;
     private String description;
-    private Long likes;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private User creator;
@@ -43,14 +44,18 @@ public class Ticket implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     private User solver;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    private Boolean isSolved;
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_expected_tickets",
             joinColumns = @JoinColumn(name = "ticket_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<User> candidates = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER, mappedBy = "ticket", orphanRemoval = true)
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<Comment> comments = new ArrayList<>();
 
     @Column(updatable = false)
