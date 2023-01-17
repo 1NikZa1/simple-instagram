@@ -46,7 +46,7 @@ public class ImageUploadService {
         User user = userService.getUserByPrincipal(principal);
         LOG.info("Uploading image profile to User {}", user.getId());
 
-        ImageModel userProfileImage = imageRepository.findByUserId(user.getId())
+        ImageModel userProfileImage = imageRepository.findByUserIdAndIsBackground(user.getId(), false)
                 .orElse(null);
         if (!ObjectUtils.isEmpty(userProfileImage)) {
             imageRepository.delete(userProfileImage);
@@ -55,6 +55,24 @@ public class ImageUploadService {
         imageModel.setUserId(user.getId());
         imageModel.setImageBytes(compressBytes(file.getBytes()));
         imageModel.setName(file.getOriginalFilename());
+        imageModel.setIsBackground(false);
+        imageRepository.save(imageModel);
+    }
+
+    public void uploadBackgroundToUser(MultipartFile file, Principal principal) throws IOException {
+        User user = userService.getUserByPrincipal(principal);
+        LOG.info("Uploading background to User {}", user.getId());
+
+        ImageModel userBackgroundImage = imageRepository.findByUserIdAndIsBackground(user.getId(), true)
+                .orElse(null);
+        if (!ObjectUtils.isEmpty(userBackgroundImage)) {
+            imageRepository.delete(userBackgroundImage);
+        }
+        ImageModel imageModel = new ImageModel();
+        imageModel.setUserId(user.getId());
+        imageModel.setImageBytes(compressBytes(file.getBytes()));
+        imageModel.setName(file.getOriginalFilename());
+        imageModel.setIsBackground(true);
         imageRepository.save(imageModel);
     }
 
@@ -104,7 +122,16 @@ public class ImageUploadService {
 
     public ImageModel getImageToUser(Principal principal) {
         User user = userService.getUserByPrincipal(principal);
-        ImageModel imageModel = imageRepository.findByUserId(user.getId()).orElse(null);
+        ImageModel imageModel = imageRepository.findByUserIdAndIsBackground(user.getId(), false).orElse(null);
+        if (!ObjectUtils.isEmpty(imageModel)) {
+            imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
+        }
+        return imageModel;
+    }
+
+    public ImageModel getBackgroundImageToUser(Principal principal) {
+        User user = userService.getUserByPrincipal(principal);
+        ImageModel imageModel = imageRepository.findByUserIdAndIsBackground(user.getId(), true).orElse(null);
         if (!ObjectUtils.isEmpty(imageModel)) {
             imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
         }
@@ -112,7 +139,27 @@ public class ImageUploadService {
     }
 
     public ImageModel getImageToUserById(Long userId) {
-        ImageModel imageModel = imageRepository.findByUserId(userId).orElse(null);
+        ImageModel imageModel = imageRepository.findByUserIdAndIsBackground(userId, false).orElse(null);
+        if (!ObjectUtils.isEmpty(imageModel)) {
+            imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
+        }
+        return imageModel;
+    }
+
+    public ImageModel getImageToUserByUsername(String username) {
+        User user= userService.getUserByUsername(username);
+        ImageModel imageModel = imageRepository.findByUserIdAndIsBackground(user.getId(), false).orElse(null);
+
+        if (!ObjectUtils.isEmpty(imageModel)) {
+            imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
+        }
+        return imageModel;
+    }
+
+    public ImageModel getBackgroundImageToUserByUsername(String username) {
+        User user= userService.getUserByUsername(username);
+        ImageModel imageModel = imageRepository.findByUserIdAndIsBackground(user.getId(), true).orElse(null);
+
         if (!ObjectUtils.isEmpty(imageModel)) {
             imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
         }

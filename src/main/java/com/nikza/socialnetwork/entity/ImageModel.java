@@ -30,4 +30,7 @@ public class ImageModel implements Serializable {
     @JsonIgnore
     private Long postId;
 
+    @JsonIgnore
+    private Boolean isBackground;
+
 }

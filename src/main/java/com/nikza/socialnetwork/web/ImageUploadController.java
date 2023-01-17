@@ -28,6 +28,14 @@ public class ImageUploadController {
         return new ResponseEntity<>(new MessageResponse("Image upload successfully to user"), HttpStatus.OK);
     }
 
+    @PostMapping("/bgUpload")
+    public ResponseEntity<MessageResponse> uploadBackgroundToUser(@RequestParam("file") MultipartFile file,
+                                                             Principal principal) throws IOException {
+        imageUploadService.uploadBackgroundToUser(file, principal);
+
+        return new ResponseEntity<>(new MessageResponse("Image upload successfully to user"), HttpStatus.OK);
+    }
+
     @PostMapping("/{postId}/upload")
     public ResponseEntity<MessageResponse> uploadImageToPost(@PathVariable("postId") Long postId,
                                                              @RequestParam("file") MultipartFile file,
@@ -53,9 +61,30 @@ public class ImageUploadController {
         return new ResponseEntity<>(userImage, HttpStatus.OK);
     }
 
-    @GetMapping("/profileImage/{userId}")
-    public ResponseEntity<ImageModel> getImageToUserById(@PathVariable("userId") Long userId){
-        ImageModel userImage = imageUploadService.getImageToUserById(userId);
+    @GetMapping("/bgImage")
+    public ResponseEntity<ImageModel> getBackgroundImageToUser(Principal principal){
+        ImageModel userImage = imageUploadService.getBackgroundImageToUser(principal);
+
+        return new ResponseEntity<>(userImage, HttpStatus.OK);
+    }
+
+//    @GetMapping("/profileImage/{userId}")
+//    public ResponseEntity<ImageModel> getImageToUserById(@PathVariable("userId") Long userId){
+//        ImageModel userImage = imageUploadService.getImageToUserById(userId);
+//
+//        return new ResponseEntity<>(userImage, HttpStatus.OK);
+//    }
+
+    @GetMapping("/profileImage/{username}")
+    public ResponseEntity<ImageModel> getImageToUserByUsername(@PathVariable("username") String username){
+        ImageModel userImage = imageUploadService.getImageToUserByUsername(username);
+
+        return new ResponseEntity<>(userImage, HttpStatus.OK);
+    }
+
+    @GetMapping("/bgImage/{username}")
+    public ResponseEntity<ImageModel> getBackgroundImageToUserByUsername(@PathVariable("username") String username){
+        ImageModel userImage = imageUploadService.getBackgroundImageToUserByUsername(username);
 
         return new ResponseEntity<>(userImage, HttpStatus.OK);
     }
