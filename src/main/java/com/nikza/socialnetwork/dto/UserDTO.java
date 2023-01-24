@@ -1,8 +1,8 @@
 package com.nikza.socialnetwork.dto;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
 
 @Data
 public class UserDTO {

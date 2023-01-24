@@ -2,9 +2,8 @@ package com.nikza.socialnetwork.validations;
 
 import com.nikza.socialnetwork.annotations.PasswordMatches;
 import com.nikza.socialnetwork.payload.request.SignupRequest;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class PasswordMatchesValidator extends SignupRequest implements ConstraintValidator<PasswordMatches, Object> {
     @Override

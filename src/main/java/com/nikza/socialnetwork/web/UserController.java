@@ -7,17 +7,22 @@ import com.nikza.socialnetwork.facade.CommunityFacade;
 import com.nikza.socialnetwork.facade.UserFacade;
 import com.nikza.socialnetwork.service.UserService;
 import com.nikza.socialnetwork.validations.ResponseErrorValidation;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/user")
@@ -42,7 +47,7 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<UserDTO>> getAllUsers(Principal principal) {
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers().
                 stream()
                 .map(userFacade::userToUserDTO)

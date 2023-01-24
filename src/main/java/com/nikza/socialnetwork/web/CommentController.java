@@ -6,6 +6,7 @@ import com.nikza.socialnetwork.facade.CommentFacade;
 import com.nikza.socialnetwork.payload.response.MessageResponse;
 import com.nikza.socialnetwork.service.CommentService;
 import com.nikza.socialnetwork.validations.ResponseErrorValidation;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 

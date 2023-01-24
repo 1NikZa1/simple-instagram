@@ -1,7 +1,13 @@
 package com.nikza.socialnetwork.security;
 
 import com.nikza.socialnetwork.entity.User;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -46,16 +52,16 @@ public class JWTTokenProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (SignatureException |
-                MalformedJwtException |
-                ExpiredJwtException |
-                UnsupportedJwtException |
-                IllegalArgumentException ex) {
+                 MalformedJwtException |
+                 ExpiredJwtException |
+                 UnsupportedJwtException |
+                 IllegalArgumentException ex) {
             LOG.error(ex.getMessage());
             return false;
         }
     }
 
-    public Long getUserIdFromToken(String token){
+    public Long getUserIdFromToken(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(SecurityConstants.SECRET)
                 .parseClaimsJws(token)

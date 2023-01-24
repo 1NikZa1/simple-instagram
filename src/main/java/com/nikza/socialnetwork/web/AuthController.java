@@ -9,6 +9,7 @@ import com.nikza.socialnetwork.security.JWTTokenProvider;
 import com.nikza.socialnetwork.security.SecurityConstants;
 import com.nikza.socialnetwork.service.UserService;
 import com.nikza.socialnetwork.validations.ResponseErrorValidation;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +21,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 
 @CrossOrigin
 @RestController
