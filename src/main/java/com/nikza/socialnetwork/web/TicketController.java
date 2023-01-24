@@ -1,33 +1,18 @@
 package com.nikza.socialnetwork.web;
 
-import com.nikza.socialnetwork.dto.CommunityPostDTO;
-import com.nikza.socialnetwork.dto.PostDTO;
 import com.nikza.socialnetwork.dto.TicketDTO;
-import com.nikza.socialnetwork.entity.Post;
-import com.nikza.socialnetwork.entity.Ticket;
-import com.nikza.socialnetwork.facade.PostFacade;
 import com.nikza.socialnetwork.facade.TicketFacade;
-import com.nikza.socialnetwork.payload.response.MessageResponse;
-import com.nikza.socialnetwork.service.PostService;
 import com.nikza.socialnetwork.service.TicketService;
 import com.nikza.socialnetwork.validations.ResponseErrorValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ObjectUtils;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import java.security.Principal;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("api/ticket")
