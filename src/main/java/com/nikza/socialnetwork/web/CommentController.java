@@ -2,11 +2,11 @@ package com.nikza.socialnetwork.web;
 
 import com.nikza.socialnetwork.dto.CommentDTO;
 import com.nikza.socialnetwork.entity.Comment;
-import com.nikza.socialnetwork.facade.CommentFacade;
 import com.nikza.socialnetwork.payload.response.MessageResponse;
 import com.nikza.socialnetwork.service.CommentService;
 import com.nikza.socialnetwork.validations.ResponseErrorValidation;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +25,10 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
     @Autowired
-    private CommentFacade commentFacade;
+    private ModelMapper modelMapper;
     @Autowired
     private ResponseErrorValidation responseErrorValidation;
+
 
     @PostMapping("/{postId}/create")
     public ResponseEntity<Object> createComment(@Valid @RequestBody CommentDTO commentDTO,
@@ -39,7 +40,7 @@ public class CommentController {
         if (!ObjectUtils.isEmpty(errors)) return errors;
 
         Comment comment = commentService.saveComment(postId, commentDTO, principal);
-        CommentDTO createdComment = commentFacade.commentToCommentDTO(comment);
+        CommentDTO createdComment = modelMapper.map(comment, CommentDTO.class);
 
         return new ResponseEntity<>(createdComment, HttpStatus.OK);
     }
@@ -48,7 +49,7 @@ public class CommentController {
     public ResponseEntity<List<CommentDTO>> getAllCommentsToPost(@PathVariable("postId") Long postId) {
         List<CommentDTO> commentDTOList = commentService.getAllCommentsForPost(postId)
                 .stream()
-                .map(commentFacade::commentToCommentDTO)
+                .map(comment -> modelMapper.map(comment,CommentDTO.class))
                 .toList();
 
         return new ResponseEntity<>(commentDTOList, HttpStatus.OK);

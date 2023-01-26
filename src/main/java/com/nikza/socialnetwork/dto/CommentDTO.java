@@ -3,6 +3,8 @@ package com.nikza.socialnetwork.dto;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class CommentDTO {
 
@@ -10,5 +12,5 @@ public class CommentDTO {
     @NotEmpty
     private String message;
     private String username;
-
+    private LocalDateTime createdDate;
 }

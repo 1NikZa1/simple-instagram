@@ -1,9 +1,9 @@
 package com.nikza.socialnetwork.web;
 
 import com.nikza.socialnetwork.dto.TicketDTO;
-import com.nikza.socialnetwork.facade.TicketFacade;
 import com.nikza.socialnetwork.service.TicketService;
 import com.nikza.socialnetwork.validations.ResponseErrorValidation;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ public class TicketController {
     @Autowired
     private TicketService ticketService;
     @Autowired
-    private TicketFacade ticketFacade;
+    private ModelMapper modelMapper;
     @Autowired
     private ResponseErrorValidation responseErrorValidation;
 
@@ -43,7 +43,7 @@ public class TicketController {
     public ResponseEntity<List<TicketDTO>> getAllTickets() {
         List<TicketDTO> ticketDTOList = ticketService.getAllTickets()
                 .stream()
-                .map(ticketFacade::ticketToTicketDTO)
+                .map(ticket -> modelMapper.map(ticket, TicketDTO.class))
                 .toList();
         return new ResponseEntity<>(ticketDTOList, HttpStatus.OK);
     }
