@@ -41,7 +41,7 @@ public class PostService {
     }
 
     public Post createPostToUser(PostDTO postDTO, Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         Post post = Post.builder()
                 .user(user)
                 .caption(postDTO.getCaption())
@@ -55,7 +55,7 @@ public class PostService {
     }
 
     public Post createPostToCommunity(CommunityPostDTO postDTO, Long communityId, Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
 
@@ -79,13 +79,13 @@ public class PostService {
     }
 
     public Post getPostById(Long postId, Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         return postRepository.findPostByIdAndUser(postId, user)
                 .orElseThrow(() -> new PostNotFoundException("Post cannot be found for User " + user.getId()));
     }
 
     public List<Post> getAllPostsForUser(Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         return postRepository.findAllByUserOrderByCreatedDate(user);
     }
 
@@ -98,7 +98,7 @@ public class PostService {
     }
 
     public List<Post> getAllPostsFromFollowedCommunities(Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         List<Community> communities = communityRepository.findAllByUsers_id(user.getId());
 
         return communities.stream()
@@ -112,7 +112,7 @@ public class PostService {
     }
 
     public Post likePost(Long postId, Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post " + postId + " not found"));
 

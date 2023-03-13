@@ -42,7 +42,7 @@ public class CommunityService {
     }
 
     public Community createCommunity(CommunityDTO communityDTO, Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
 
         LOG.info("creating Community for User: {}", user.getEmail());
 
@@ -61,7 +61,7 @@ public class CommunityService {
     }
 
     public Community updateCommunity(CommunityDTO communityDTO, Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         Community community = getCommunityById(communityDTO.getId());
 
         if (!user.getId().equals(community.getCreator().getId()))
@@ -76,7 +76,7 @@ public class CommunityService {
     }
 
     public void delete(Long communityId, Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         Community community = getCommunityById(communityId);
         if (Objects.equals(user.getId(), community.getCreator().getId())) {
             Optional<ImageModel> imageModel = imageRepository.findByCommunityId(communityId);
@@ -88,7 +88,7 @@ public class CommunityService {
     }
 
     public void followCommunity(Long communityId, Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         Community community = getCommunityById(communityId);
 
         if (user.getCommunities().contains(community)) {

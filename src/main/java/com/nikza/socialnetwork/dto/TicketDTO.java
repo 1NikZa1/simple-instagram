@@ -1,6 +1,7 @@
 package com.nikza.socialnetwork.dto;
 
 import com.nikza.socialnetwork.entity.Comment;
+import com.nikza.socialnetwork.entity.TicketStatus;
 import com.nikza.socialnetwork.entity.User;
 import lombok.Data;
 
@@ -17,6 +18,7 @@ public class TicketDTO {
     private User solver;
     private List<Comment> comments;
     private List<User> candidates;
-    private Boolean isSolved;
     private LocalDateTime createdDate;
+    private TicketStatus status;
+
 }

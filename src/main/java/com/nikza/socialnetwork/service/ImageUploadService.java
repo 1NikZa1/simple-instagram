@@ -43,7 +43,7 @@ public class ImageUploadService {
     }
 
     public void uploadImageToUser(MultipartFile file, Principal principal) throws IOException {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         LOG.info("Uploading image profile to User {}", user.getId());
 
         ImageModel userProfileImage = imageRepository.findByUserIdAndIsBackground(user.getId(), false)
@@ -60,7 +60,7 @@ public class ImageUploadService {
     }
 
     public void uploadBackgroundToUser(MultipartFile file, Principal principal) throws IOException {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         LOG.info("Uploading background to User {}", user.getId());
 
         ImageModel userBackgroundImage = imageRepository.findByUserIdAndIsBackground(user.getId(), true)
@@ -77,7 +77,7 @@ public class ImageUploadService {
     }
 
     public void uploadImageToCommunity(MultipartFile file, Principal principal, Long communityId) throws IOException {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         Community community = communityRepository.getReferenceById(communityId);
 
         if (user.getId().equals(community.getCreator().getId())) {
@@ -98,7 +98,7 @@ public class ImageUploadService {
     }
 
     public void uploadImageToPost(MultipartFile file, Principal principal, Long postId) throws IOException {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         List<Post> posts = new ArrayList<>(user.getPosts());
         List<Community> communities = communityRepository.findAllByOrderByName();
 
@@ -121,7 +121,7 @@ public class ImageUploadService {
     }
 
     public ImageModel getImageToUser(Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         ImageModel imageModel = imageRepository.findByUserIdAndIsBackground(user.getId(), false).orElse(null);
         if (!ObjectUtils.isEmpty(imageModel)) {
             imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));
@@ -130,7 +130,7 @@ public class ImageUploadService {
     }
 
     public ImageModel getBackgroundImageToUser(Principal principal) {
-        User user = userService.getUserByPrincipal(principal);
+        User user = userService.getCurrentUser(principal);
         ImageModel imageModel = imageRepository.findByUserIdAndIsBackground(user.getId(), true).orElse(null);
         if (!ObjectUtils.isEmpty(imageModel)) {
             imageModel.setImageBytes(decompressBytes(imageModel.getImageBytes()));

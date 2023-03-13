@@ -52,7 +52,7 @@ public class UserService {
     }
 
     public User updateUser(UserDTO userDTO, Principal principal) {
-        User user = getUserByPrincipal(principal);
+        User user = getCurrentUser(principal);
         user.setName(userDTO.getFirstname());
         user.setLastname(userDTO.getLastname());
         user.setUsername(userDTO.getUsername());
@@ -61,7 +61,8 @@ public class UserService {
     }
 
     public User getCurrentUser(Principal principal) {
-        return getUserByPrincipal(principal);
+        return userRepository.findUserByUsername(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     public User getUserById(Long userId) {
@@ -79,18 +80,12 @@ public class UserService {
     }
 
     public List<Community> getCommunitiesFollowedByUser(Principal principal) {
-        User user = getUserByPrincipal(principal);
+        User user = getCurrentUser(principal);
         return communityRepository.findAllByUsers_id(user.getId());
     }
 
     public List<Community> getCommunitiesCreatedByUser(Principal principal) {
-        User user = getUserByPrincipal(principal);
+        User user = getCurrentUser(principal);
         return communityRepository.findAllByCreator_id(user.getId());
-    }
-
-    public User getUserByPrincipal(Principal principal) {
-        String username = principal.getName();
-        return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }

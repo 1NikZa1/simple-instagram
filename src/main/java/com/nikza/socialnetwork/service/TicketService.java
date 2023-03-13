@@ -1,7 +1,10 @@
 package com.nikza.socialnetwork.service;
 
+import com.nikza.socialnetwork.dto.TicketDTO;
 import com.nikza.socialnetwork.entity.Ticket;
+import com.nikza.socialnetwork.entity.TicketStatus;
 import com.nikza.socialnetwork.entity.User;
+import com.nikza.socialnetwork.exceptions.TicketNotFoundException;
 import com.nikza.socialnetwork.repository.CommunityRepository;
 import com.nikza.socialnetwork.repository.ImageRepository;
 import com.nikza.socialnetwork.repository.PostRepository;
@@ -14,6 +17,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -23,51 +28,79 @@ public class TicketService {
 
     private final PostRepository postRepository;
     private final TicketRepository ticketRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ImageRepository imageRepository;
     private final CommunityRepository communityRepository;
 
     @Autowired
-    public TicketService(PostRepository postRepository, TicketRepository ticketRepository, UserRepository userRepository, ImageRepository imageRepository, CommunityRepository communityRepository) {
+    public TicketService(PostRepository postRepository, TicketRepository ticketRepository, UserService userService, ImageRepository imageRepository, CommunityRepository communityRepository) {
         this.postRepository = postRepository;
         this.ticketRepository = ticketRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.imageRepository = imageRepository;
         this.communityRepository = communityRepository;
     }
 
-//    public Ticket createTicket(TicketDTO dto, Principal principal) {
-//        User user = getUserByPrincipal(principal);
-//        Ticket ticket = Ticket.builder()
-//                .title(dto.getTitle())
-//                .description(dto.getDescription())
-//                .likes(0)
-//                .creator(user)
-//                .solver(dto.getSolver())
-//                .build();
-//
-//        LOG.info("saving Ticket for User: {}", user.getEmail());
-//        return ticketRepository.save(ticket);
-//    }
+    public Ticket createTicket(TicketDTO dto, Principal principal) {
+        User creator = userService.getCurrentUser(principal);
+        Ticket ticket = Ticket.builder()
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .creator(creator)
+                .build();
 
-//    public Ticket followTicket(Long ticketId, Principal principal) {
-//        User user = getUserByPrincipal(principal);
-//        Ticket ticket = ticketRepository.findById(ticketId)
-//                        .orElseThrow(() -> new TicketNotFoundException("ticket not found"));
-//
-//        ticket.setCandidates(ticket.getCandidates().add(user));
-//        LOG.info("saving Ticket for User: {}", user.getEmail());
-//        return ticketRepository.save(ticket);
-//    }
+        LOG.info("saving Ticket by User: {}", creator.getEmail());
+        return ticketRepository.save(ticket);
+    }
+
+    public Ticket addCandidate(Long ticketId, Principal principal) {
+        User user = userService.getCurrentUser(principal);
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException("Ticket not found"));
+        List<User> candidates = ticket.getCandidates();
+
+        if (candidates.contains(user)) {
+            candidates.remove(user);
+            LOG.info("removing Candidate {} for Ticket: {}", user.getEmail(), ticketId);
+        } else {
+            candidates.add(user);
+            LOG.info("adding Candidate {} for Ticket: {}", user.getEmail(), ticketId);
+        }
+
+        ticket.setCandidates(candidates);
+        return ticketRepository.save(ticket);
+    }
+
+    public Ticket addSolver(Long ticketId, Long solverId, Principal principal) {
+        User creator = userService.getCurrentUser(principal);
+        User solver = userService.getUserById(solverId);
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException("Ticket not found"));
+        List<User> candidates = ticket.getCandidates();
+
+        if (creator.equals(ticket.getCreator()) && candidates.contains(solver)) {
+            ticket.setCandidates(Collections.emptyList());
+            ticket.setSolver(solver);
+            LOG.info("added Solver {} for Ticket: {}", solverId, ticketId);
+
+        }
+
+        return ticketRepository.save(ticket);
+    }
+
+    public Ticket changeStatus(Long ticketId, TicketStatus status, Principal principal) {
+        User solver = userService.getCurrentUser(principal);
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException("Ticket not found"));
+
+        if (solver.equals(ticket.getSolver())) {
+            ticket.setStatus(status);
+        }
+
+        return ticketRepository.save(ticket);
+    }
 
     public List<Ticket> getAllTickets() {
         return ticketRepository.findAllByOrderByCreatedDateDesc();
-    }
-
-
-    public User getUserByPrincipal(Principal principal) {
-        String username = principal.getName();
-        return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
     }
 }

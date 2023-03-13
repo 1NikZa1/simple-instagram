@@ -35,7 +35,9 @@ public class Ticket implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String title;
+
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -44,7 +46,7 @@ public class Ticket implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     private User solver;
 
-    private Boolean isSolved;
+    private TicketStatus status;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_expected_tickets",
@@ -64,5 +66,6 @@ public class Ticket implements Serializable {
     @PrePersist
     protected void onCreate() {
         this.createdDate = LocalDateTime.now();
+        this.status = TicketStatus.CREATED;
     }
 }
